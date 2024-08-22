@@ -1,0 +1,9 @@
+{% extends "usuarios/layout.html" %}
+
+{% block body %}
+    {% csrf_token %}
+    <h1>Teste de página</h1>
+
+    <a href="{% url 'logout' %}">Log out</a>
+    
+{% endblock %}

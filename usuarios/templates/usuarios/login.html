@@ -1,0 +1,35 @@
+{% extends "usuarios/layout.html" %}
+
+
+{% block body %}
+
+           <h1>Login</h1>
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <style>
+
+            form{
+                text-align: center;
+            }
+
+            h1{
+                text-align: center;
+                border: 1px solid bisque;
+                border-radius: 5px;
+                background-color: beige;
+            }
+            div{
+                margin-top: 10px;
+            }
+        </style>
+        <input type="text" name="usuario" placeholder="Usuario">
+        <input type="password" name="senha" placeholder="Senha">
+        <input type="submit" value="Login">
+        {% if mensagem %}
+
+        <div>{{ mensagem }}</div>
+
+        {% endif %}
+
+    </form>
+{% endblock %}
