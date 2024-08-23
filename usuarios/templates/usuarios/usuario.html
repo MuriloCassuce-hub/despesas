@@ -1,9 +1,87 @@
 {% extends "usuarios/layout.html" %}
 
 {% block body %}
-    {% csrf_token %}
-    <h1>Teste de página</h1>
 
-    <a href="{% url 'logout' %}">Log out</a>
+    {% csrf_token %}
+
+<h1>Teste de página</h1>
+    <style>
+        .tabprincipal{
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 2px solid rgb(4, 176, 255);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+                border: 1px solid rgb(4, 176, 255);
+                padding: 8px;
+                text-align: center;
+        }
+
+        select {
+            padding: 1px;
+        }
+
+        form{
+            margin-bottom: 100px;
+        }
+
+    </style>
+
+    <table class="tabprincipal">
+        <thead>
+            <tr>
+                <th>Cartão</th>
+                <th>Item</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Parcelas</th>
+                <th>Valor Parcelado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gasto in gastos %}
+            <tr>
+                <td>{{ gasto.cartao }}</td>
+                <td>{{ gasto.item }}</td>
+                <td>{{ gasto.categoria }}</td>
+                <td>{{ gasto.valor }}</td>
+                <td>{{ gasto.parcelas }}</td>
+                <td>{{ gasto.valor_parcelado|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Criar Gastos</h1>
+    
+
+    <form action="{% url 'criar_gasto' %}" method="post">
+        
+        {% csrf_token %}
+
+        <input type="text" name="cartao" placeholder="Cartão" required>
+        <input type="text" name="item" placeholder="Item" required>
+        <select name="categoria" required>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Entretenimento">Entretenimento</option>
+            <option value="Moradia">Moradia</option>
+            <option value="Educação">Educação</option>
+            <option value="Serviços">Serviços</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Outros">Outros</option>
+        </select>
+        <input type="number" name="valor" step="0.01" placeholder="Valor" required>
+        <input type="number" name="parcelas" placeholder="Parcelas" required>
+        <button type="submit" name="criar_gasto">Criar gasto</button>
+    </form>
+
+
+    
+    <a class="botaologout" href="{% url 'logout' %}">Log out</a>
     
 {% endblock %}
