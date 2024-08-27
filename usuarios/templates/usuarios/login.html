@@ -2,34 +2,87 @@
 
 
 {% block body %}
+{% csrf_token %}
 
-           <h1>Login</h1>
-    <form action="{% url 'login' %}" method="post">
-        {% csrf_token %}
-        <style>
 
-            form{
-                text-align: center;
-            }
+<style>
+   
+    body, html {
+    font-family: Arial;
+    height: 100%;
+    display:grid;
+    justify-content: center;
+    align-items: center;
+    background-color: #5a6c68;
+    }
 
-            h1{
-                text-align: center;
-                border: 1px solid bisque;
-                border-radius: 5px;
-                background-color: beige;
-            }
-            div{
-                margin-top: 10px;
-            }
-        </style>
-        <input type="text" name="usuario" placeholder="Usuario">
-        <input type="password" name="senha" placeholder="Senha">
-        <input type="submit" value="Login">
-        {% if mensagem %}
+    .caixaLogin {
+        width: 300px;
+        padding: 40px;
+        position: center;
+        background: #fff;
+        box-shadow: 0 15px 25px rgb(108, 194, 205);
+        border-radius: 10px;
+        text-align: center;
+    }
 
-        <div>{{ mensagem }}</div>
+    .caixaLogin h1 {
+        margin: 0 0 30px;
+        color: rgb(85, 127, 131);
+    }
 
-        {% endif %}
+    .inputTexto{
+        position: center;
+        margin-bottom: 30px;
+
+    }
+
+    .inputTexto input{
+        width: 94%;
+        padding: 10px;
+        background: #f0f0f0;
+        border: none;
+        outline: none;
+        color: #333;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+    .botao{
+        width: 90%;
+        background: #333;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        color: #fff;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+
+    .botao:hover{
+        background: #8c9c9f;
+    }
+    #divMensagem{
+        margin-top: 10px;
+    }
+    
+</style>           
+    <div class="caixaLogin">
+            <h1>Login</h1>
+        <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <div class="inputTexto">
+                <input type="text" name="usuario" placeholder="Usuario">
+            </div>
+            <div class="inputTexto">
+                <input type="password" name="senha" placeholder="Senha">
+            </div>
+                <input type="submit" class="botao" value="Login">
+            {% if mensagem %}
+
+            <div id="divMensagem">{{ mensagem }}</div>
+
+            {% endif %}
+    </div>
 
     </form>
 {% endblock %}

@@ -4,8 +4,14 @@
 
     {% csrf_token %}
 
-<h1>Teste de página</h1>
     <style>
+
+        #h1Despesas{
+            text-align: left;
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
         .tabprincipal{
             border-collapse: separate;
             border-spacing: 0;
@@ -16,9 +22,9 @@
         }
 
         th, td {
-                border: 1px solid rgb(4, 176, 255);
-                padding: 8px;
-                text-align: center;
+            border: 1px solid rgb(4, 176, 255);
+            padding: 8px;
+            text-align: center;
         }
 
         select {
@@ -31,6 +37,9 @@
 
     </style>
 
+
+    <h1 id="h1Despesas">Despesas</h1>
+    <div>
     <table class="tabprincipal">
         <thead>
             <tr>
@@ -55,6 +64,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <h1>Criar Gastos</h1>
     
