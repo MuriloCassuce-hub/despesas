@@ -51,6 +51,16 @@ def criar_gasto(request):
         return HttpResponseRedirect(reverse('index'))
     
     gastos = Gastos.objects.all()
+    
+    cartao_filtro = request.GET.get('cartao')
+
+    if cartao_filtro:
+        gastos = Gastos.objects.filter(cartao=cartao_filtro)
+
+    else: 
+        gastos = Gastos.objects.all()
+
     return render(request, "usuarios/usuario.html", {
-        "gastos": gastos
+        "gastos": gastos,
+        'cartões': cartao
     })
