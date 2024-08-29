@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Gastos
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect
+
 
 # Create your views here.
 
@@ -41,26 +43,34 @@ def logout_view(request):
 
 def criar_gasto(request):
     if request.method == "POST":
-        cartao = request.POST.get("cartao")
+        cartao = request.POST.get("cartao").capitalize()
         categoria = request.POST.get("categoria")
-        item = request.POST.get("item")
+        item = request.POST.get("item").capitalize()
         valor = float(request.POST.get("valor"))
         parcelas = int(request.POST.get("parcelas"))
         p = Gastos(cartao=cartao, categoria=categoria, item=item, valor=valor, parcelas=parcelas)
         p.save()
-        return HttpResponseRedirect(reverse('index'))
+        return redirect('index')
     
     gastos = Gastos.objects.all()
     
-    cartao_filtro = request.GET.get('cartao')
-
-    if cartao_filtro:
-        gastos = Gastos.objects.filter(cartao=cartao_filtro)
-
-    else: 
-        gastos = Gastos.objects.all()
-
     return render(request, "usuarios/usuario.html", {
         "gastos": gastos,
-        'cartões': cartao
     })
+
+
+def gastosIndividuais(request):
+    cartoes = Gastos.objects.values_list('cartao', flat=True).distinct()
+    cartoes_nubank = None
+
+    if request.method == "POST":
+        cartao_buscado = request.POST.get("cartao")
+        cartoes_nubank = Gastos.objects.filter(cartao=cartao_buscado)
+    
+    return render(request, 'usuarios/gastosIndividuais.html', {
+        'cartoes': cartoes,
+        'gastos': cartoes_nubank
+    })
+
+
+    

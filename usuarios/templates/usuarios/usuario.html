@@ -6,6 +6,7 @@
 
     <style>
 
+
         body {
             background-color:rgb(32, 30, 67);
         }
@@ -133,7 +134,6 @@
         } 
         #proxPag:hover{
             background: rgb(64, 64, 63);
-
         }
 
     </style>
@@ -141,9 +141,11 @@
     <h1 id="h1Despesas">Despesas</h1>
 
     <div id="divPrincipal">
+
         <table id="tabprincipal">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Cartão</th>
                     <th>Item</th>
                     <th>Categoria</th>
@@ -153,8 +155,9 @@
                 </tr>
             </thead>
             <tbody id="gastosTable">
-                {% for gasto in gastos %}
+                {% for gasto in gastos|slice:"::-1" %}
                 <tr class="gasto-item">
+                    <td>{{ gasto.id }}</td>
                     <td>{{ gasto.cartao }}</td>
                     <td>{{ gasto.item }}</td>
                     <td>{{ gasto.categoria }}</td>
@@ -173,7 +176,9 @@
         <form id="formGastos" action="{% url 'criar_gasto' %}" method="post">
             {% csrf_token %}
             <input type="text" name="cartao" placeholder="Cartão" required>
+
             <input type="text" name="item" placeholder="Item" required>
+
             <select name="categoria" required>
                 <option value="Alimentação">Alimentação</option>
                 <option value="Transporte">Transporte</option>
@@ -184,8 +189,11 @@
                 <option value="Saúde">Saúde</option>
                 <option value="Outros">Outros</option>
             </select>
+
             <input type="number" name="valor" step="0.01" placeholder="Valor" required>
+
             <input type="number" name="parcelas" placeholder="Parcelas" required>
+
             <button type="submit" name="criar_gasto">Criar gasto</button>
             
             <div id="paginationButtons">
@@ -195,12 +203,14 @@
             </div>
             
         </form>
-
-
-        
+      
 </div>
 
 <a class="botaologout" href="{% url 'logout' %}">Log out</a>
+
+
+    <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}">Testando</a>
+
 
 
     <script>

@@ -1,0 +1,113 @@
+{% extends "usuarios/layout.html" %}
+
+{% block body %}
+
+    {% csrf_token %}
+
+    <style>
+
+        body {
+            background-color:rgb(32, 30, 67);
+        }
+
+        #h1Despesas {
+            text-align: center;
+            color: rgb(238, 238, 238);
+            font-size: 40px;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        
+        }
+
+        #divPrincipal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            background-color: rgb(19, 75, 112);
+            border-radius: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            height: 600px;
+        }
+    
+        #tabprincipal {
+            width: 50%;
+            align-self: flex-start;
+            border-collapse: collapse;
+            background-color: rgb(238, 238, 238);
+            border: 1px solid rgb(80, 140, 155);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(255, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid rgb(4, 176, 255);
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: rgb(167, 209, 237);
+        }
+
+        #formConsultCart {
+            color:rgb(238, 238, 238);
+            align-self: flex-start;
+            margin-left: 20px;
+            margin-top: 15px;
+
+        }
+    </style>
+
+
+    <h1 id="h1Despesas" >Gastos com Cartões</h1>
+
+<div id="divPrincipal">
+    <table id="tabprincipal">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cartão</th>
+                <th>Item</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Parcelas</th>
+                <th>Valor Parcelado</th>
+            </tr>
+        </thead>
+        <tbody id="gastosTable">
+            {% for gasto in gastos|slice:"::-1" %}
+            <tr class="gasto-item">
+                <td>{{ gasto.id }}</td>
+                <td>{{ gasto.cartao }}</td>
+                <td>{{ gasto.item }}</td>
+                <td>{{ gasto.categoria }}</td>
+                <td>{{ gasto.valor }}</td>
+                <td>{{ gasto.parcelas }}</td>
+                <td>{{ gasto.valor_parcelado|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Nenhum gasto encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+  <form id="formConsultCart" method="post">
+
+    {% csrf_token %}
+
+    <label for="cartao">Escolha um cartão:</label>
+    <select id="cartao" name="cartao">
+        <option value="">Selecione um cartão</option>
+        {% for cartao in cartoes %}
+            <option value="{{ cartao }}">{{ cartao }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+</form>
+</div>
+
+{% endblock %}
