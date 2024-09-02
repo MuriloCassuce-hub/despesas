@@ -18,6 +18,17 @@
         
         }
 
+        .botaologout {
+            border-radius: 5px;
+            padding: 10px;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            display: block;
+            width: 80px;
+            margin-top: -50px;
+            margin-left: 20px;
+        }
+
         #divPrincipal {
             display: flex;
             justify-content: center;
@@ -58,6 +69,13 @@
             margin-top: 15px;
 
         }
+
+        #pgCriar_gasto{
+            color: white;
+            align-self: flex-end;
+            
+        }
+
     </style>
 
 
@@ -108,6 +126,12 @@
     </select>
     <button type="submit">Buscar</button>
 </form>
+
+    <a id="pgCriar_gasto" href="{% url 'criar_gasto' %}">Criar Gasto</a>
+
 </div>
+
+<a class="botaologout" href="{% url 'logout' %}">Log out</a>
+
 
 {% endblock %}

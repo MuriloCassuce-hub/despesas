@@ -32,7 +32,7 @@
         }
 
         #tabprincipal {
-            width: 50%;
+            width: 70%;
             align-self: flex-start;
             border-collapse: collapse;
             background-color: rgb(238, 238, 238);
@@ -70,7 +70,16 @@
             flex-direction: column;
             align-items: center;
             margin-left: 20px;
-            margin-top: 12px;
+        }
+
+        #botConsultIndiv{
+            size: 20px;
+            margin-top: 37%;
+            text-align: left ;
+            cursor: pointer;
+            border-radius: 10px;
+            border: #ffffff;
+            color: white;
         }
 
         #paginationButtons {
@@ -203,19 +212,21 @@
             </div>
             
         </form>
+
+        <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}">Gastos Individuais</a>
+
       
 </div>
 
 <a class="botaologout" href="{% url 'logout' %}">Log out</a>
 
 
-    <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}">Testando</a>
 
 
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const itemsPerPage = 10;
+            const itemsPerPage = 13;
             let currentPage = 1;
             const items = document.querySelectorAll("#gastosTable .gasto-item");
             const totalPages = Math.ceil(items.length / itemsPerPage);
