@@ -21,8 +21,7 @@ class Gastos(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     parcelas = models.IntegerField()
     categoria = models.CharField(max_length=30, choices=CATEGORIA_GASTO)
-    data_parcela = models.DateField()
-
+    
     def valor_parcelado(self):
         if self.parcelas > 0:
             valor_parcelado = self.valor/self.parcelas
