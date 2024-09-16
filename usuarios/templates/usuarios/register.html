@@ -1,0 +1,17 @@
+{% extends "usuarios/layout.html" %}
+
+{% block body %}
+
+    {% csrf_token %}
+
+
+<!-- register.html -->
+<h2>Registrar</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Registrar</button>
+</form>
+
+
+{% endblock %}

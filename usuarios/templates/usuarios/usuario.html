@@ -20,7 +20,7 @@
             border-radius: 15px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             padding: 10px;
-            height: 600px;
+            height: 1500px;
         }
 
         #h1Despesas {
@@ -161,6 +161,7 @@
                     <th>Valor</th>
                     <th>Parcelas</th>
                     <th>Valor Parcelado</th>
+                    <th>Data</th>
                 </tr>
             </thead>
             <tbody id="gastosTable">
@@ -173,6 +174,7 @@
                     <td>{{ gasto.valor }}</td>
                     <td>{{ gasto.parcelas }}</td>
                     <td>{{ gasto.valor_parcelado|floatformat:2 }}</td>
+                    <td>{{ gasto.data_inicial }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -202,6 +204,8 @@
             <input type="number" name="valor" step="0.01" placeholder="Valor" required>
 
             <input type="number" name="parcelas" placeholder="Parcelas" required>
+            <input type="date" name="data_inicial" placeholder="Data da Primeira Parcela (mm/yy)">
+
 
             <button type="submit" name="criar_gasto">Criar gasto</button>
             
