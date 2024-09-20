@@ -1,12 +1,13 @@
-{% extends "usuarios/layout.html" %}
-
-{% block body %}
+<html>
+<head>
+    <title>Despesas</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
 
     {% csrf_token %}
 
     <style>
-
-
         body {
             background-color:rgb(32, 30, 67);
         }
@@ -15,12 +16,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto;
             background-color: rgb(19, 75, 112);
             border-radius: 15px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             padding: 10px;
-            height: 1500px;
+            height: 600px;
+            margin-bottom: 20px;
         }
 
         #h1Despesas {
@@ -32,15 +33,14 @@
         }
 
         #tabprincipal {
-            width: 70%;
-            align-self: flex-start;
             border-collapse: collapse;
             background-color: rgb(238, 238, 238);
             border: 1px solid rgb(80, 140, 155);
             border-radius: 10px;
             overflow: hidden;
-            margin-left: 20px;
+            margin-left: 10px;
             box-shadow: 0px 4px 10px rgba(255, 0, 0, 0.1);
+            box-sizing: border-box;
         }
 
         th, td {
@@ -52,17 +52,44 @@
             background-color: rgb(167, 209, 237);
         }
 
+        #tr_criar_gasto:hover{
+            background-color: rgba(246, 208, 131, 0.378);
+        }
+
         select {
             padding: 1px;
             border-width: 2px;
             border-color: black;
         }
 
+        #gasto-graph {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(19, 75, 112);
+            border-radius: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            height: 480px;
+        }
 
         #formGastos {
             align-self: flex-start;
             width: 300px;
-            padding: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 20px;
+        }
+        
+        #formGastos2{
+            align-self: center;
+            width: 300px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             background-color: #fff;
@@ -72,24 +99,18 @@
             margin-left: 20px;
         }
 
-        #botConsultIndiv{
-            size: 20px;
-            margin-top: 37%;
-            text-align: left ;
-            cursor: pointer;
-            border-radius: 10px;
-            border: #ffffff;
-            color: white;
+        #formTabela{
+            align-self: flex-start;
         }
 
-        #paginationButtons {
+        #paginationButtons, #paginationButtons2 {
             display: flex;
             justify-content: space-between;
             width: 100%;
             margin-top: 15px;
         }
 
-        #anterPag, #proxPag {
+        #anterPag, #proxPag, #anterPag2, #proxPag2  {
             background-color: rgb(82, 97, 237);
             width: 70px;
             padding: 10px;
@@ -99,11 +120,25 @@
             text-align: center;
         }
 
-        #pageInfo {
+        #botConsultIndiv {
+            color: white;
+            text-decoration: none;
+            background-color: rgb(32, 151, 255);
+            border-radius: 5px;
+            padding: 8px;
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        #pageInfo, #pageInfo2 {
             color: #000000;
-            width: 90px;    
+            width: 100px;    
             align-self: auto;
             padding: 5px;
+            margin-top: 4px;
             
         }
 
@@ -126,13 +161,12 @@
 
         .botaologout {
             border-radius: 5px;
-            padding: 10px;
             color: rgb(255, 255, 255);
+            text-decoration: none;
             text-align: center;
             display: block;
             width: 80px;
-            margin-top: -50px;
-            margin-left: 20px;
+            margin-left: 95%;
         }
 
         .botaologout:hover {
@@ -145,94 +179,194 @@
             background: rgb(64, 64, 63);
         }
 
+        #genGraph{
+            margin-bottom: 20px;
+        }
+
+        #gasto-graph-cartao, #gasto-graph-categoria{
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
+            left: -200;
+            border: 2px solid rgb(124, 190, 251);
+            background-color: rgb(124, 190, 251);
+            border-radius: 15px;
+        }
+        #deleteCheck{
+            cursor: pointer;
+        }
+        #deletarDados{
+            background-color: rgb(228, 84, 84);
+            color: white;
+        }
+
+        #graficoSelecaoTipo{
+            flex-direction: column;
+        }
+        #subdiv{
+            position: absolute;
+            right: 150;
+        }
+        
+
     </style>
 
-    <h1 id="h1Despesas">Despesas</h1>
+    <a class="botaologout" href="{% url 'logout' %}">Log out</a>
 
+    <h1 id="h1Despesas">Despesas</h1>
+    
     <div id="divPrincipal">
 
-        <table id="tabprincipal">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cartão</th>
-                    <th>Item</th>
-                    <th>Categoria</th>
-                    <th>Valor</th>
-                    <th>Parcelas</th>
-                    <th>Valor Parcelado</th>
-                    <th>Data</th>
-                </tr>
-            </thead>
-            <tbody id="gastosTable">
-                {% for gasto in gastos|slice:"::-1" %}
-                <tr class="gasto-item">
-                    <td>{{ gasto.id }}</td>
-                    <td>{{ gasto.cartao }}</td>
-                    <td>{{ gasto.item }}</td>
-                    <td>{{ gasto.categoria }}</td>
-                    <td>{{ gasto.valor }}</td>
-                    <td>{{ gasto.parcelas }}</td>
-                    <td>{{ gasto.valor_parcelado|floatformat:2 }}</td>
-                    <td>{{ gasto.data_inicial }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6">Nenhum gasto encontrado.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <form method="POST" id="formTabela" action="{% url 'criar_gasto' %}">
+            {% csrf_token %}
+            <input type="hidden" name="deletar_selecionados" id="idsParaDeletar" value="">
+        
+            <table id="tabprincipal">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>ID</th>
+                        <th>Cartão</th>
+                        <th>Item</th>
+                        <th>Valor Parcelado</th>
+                        <th>Parcela atual</th>
+                        <th>Valor total</th>
+                        <th>Categoria</th>
+                        <th>Data da fatura</th>
+                    </tr>
+                </thead>
+                <tbody id="gastosTable">
+                    {% for gasto in gastos|slice:"::-1" %}
+                    <tr id="tr_criar_gasto" class="gasto-item">
+                        <td><input id="deleteCheck" type="checkbox" name="deletar" value="{{ gasto.id }}"></td>
+                        <td>{{ gasto.id }}</td>
+                        <td>{{ gasto.cartao }}</td>
+                        <td>{{ gasto.item }}</td>
+                        <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
+                        <td>{{ gasto.parcelas }}</td>
+                        <td>R$ {{ gasto.valor }}</td>
+                        <td>{{ gasto.categoria }}</td>
+                        <td>{{ gasto.data_inicial }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">Nenhum gasto encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
 
         <form id="formGastos" action="{% url 'criar_gasto' %}" method="post">
             {% csrf_token %}
             <input type="text" name="cartao" placeholder="Cartão" required>
 
             <input type="text" name="item" placeholder="Item" required>
-
+        
             <select name="categoria" required>
+                <option value="" disabled selected>Selecione uma categoria</option>
                 <option value="Alimentação">Alimentação</option>
                 <option value="Transporte">Transporte</option>
                 <option value="Entretenimento">Entretenimento</option>
                 <option value="Moradia">Moradia</option>
+                <option value="Lazer">Lazer</option>
                 <option value="Educação">Educação</option>
                 <option value="Serviços">Serviços</option>
                 <option value="Saúde">Saúde</option>
                 <option value="Outros">Outros</option>
             </select>
 
-            <input type="number" name="valor" step="0.01" placeholder="Valor" required>
-
-            <input type="number" name="parcelas" placeholder="Parcelas" required>
+            <input type="number" name="valor" step="0.01" placeholder="Valor" required min="0" max="99999999" step="0.0001">
+            <input type="number" name="parcelas" placeholder="Parcelas" min="1" max="120" step="1" required>
             <input type="date" name="data_inicial" placeholder="Data da Primeira Parcela (mm/yy)">
 
 
             <button type="submit" name="criar_gasto">Criar gasto</button>
+            <button type="button" id="deletarDados">Deletar Selecionados</button>
             
             <div id="paginationButtons">
                 <button id="anterPag">Anterior</button>
                 <span id="pageInfo">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag">Próximo</button>
             </div>
+            <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}"> Acessar Gastos Individuais</a>
+            <a id="botConsultIndiv" href="{% url 'gastosMensais' %}">Acessar Gastos Mensais</a>
+
+
             
         </form>
 
-        <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}">Gastos Individuais</a>
 
-      
 </div>
 
-<a class="botaologout" href="{% url 'logout' %}">Log out</a>
+<div id="divPrincipal">
 
+    
+    {% if graph_json_cartao %}
+        <div id="gasto-graph-cartao"></div>
+        <script id="scriptPizzaCartao" type="text/javascript">
+            var graph_data_cartao = {{ graph_json_cartao|safe }};
+        </script>
+    {% endif %}
 
+    {% if graph_json_categoria %}
+        <div id="gasto-graph-categoria"></div>
+        <script type="text/javascript">
+            var graph_data_categoria = {{ graph_json_categoria|safe }};
+        </script>
+    {% endif %}
 
+    <div id="subdiv">
+        <form id="formGastos">
+        <select name="tipoGrafico" id="selectGrafico">
+            <option value="selecionar">Selecione o tipo de gráfico</option>
+            <option value="graficoCartaoPizza">Gráfico pelo cartão</option>
+            <option value="graficoCategoriaPizza">Gráfico pela categoria</option>
+        </select>
+        <button id="buscarGrafico" name="buscarGrafico">OK</button>
+    </form>
+    </div>
 
+</div>
 
-    <script>
+    <script type="text/javascript">
+
         document.addEventListener("DOMContentLoaded", function() {
-            const itemsPerPage = 13;
+                document.getElementById("buscarGrafico").addEventListener("click", function(event){
+                    event.preventDefault();
+                    var selectedGrafico = document.getElementById("selectGrafico").value;
+                    document.getElementById("gasto-graph-cartao").style.display = "none";
+                    document.getElementById("gasto-graph-categoria").style.display = "none";
+                    if (selectedGrafico === "graficoCartaoPizza") {
+                        document.getElementById("gasto-graph-cartao").style.display = "block";
+                        Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
+                    } else if (selectedGrafico === "graficoCategoriaPizza") {
+                        document.getElementById("gasto-graph-categoria").style.display = "block";
+                        Plotly.newPlot('gasto-graph-categoria', graph_data_categoria.data, graph_data_categoria.layout);
+                    }
+                });
+            });        
+
+        document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("deletarDados").addEventListener("click", function(event) {
+            event.preventDefault();
+            if (confirm(`Você tem certeza que deseja apagar?`)) {
+                const checkboxes = document.querySelectorAll('input[name="deletar"]:checked');
+            let ids = [];
+                checkboxes.forEach(function(checkbox) {
+                ids.push(checkbox.value);
+            });
+            document.getElementById("idsParaDeletar").value = ids.join(',');
+                document.getElementById("formTabela").submit();
+
+            alert("A exclusão foi realizada com sucesso!")
+            }else {
+                alert("Ação cancelada!");
+            }});
+            
+            const itemsPerPage = 11;
             let currentPage = 1;
-            const items = document.querySelectorAll("#gastosTable .gasto-item");
+            const items = document.querySelectorAll("#gastosTable .gasto-item ");
             const totalPages = Math.ceil(items.length / itemsPerPage);
 
             function showPage(page) {
@@ -243,23 +377,22 @@
                 document.getElementById("anterPag").disabled = page === 1;
                 document.getElementById("proxPag").disabled = page === totalPages;
             }
-
             document.getElementById("anterPag").addEventListener("click", function() {
                 if (currentPage > 1) {
                     currentPage--;
                     showPage(currentPage);
                 }
             });
-
             document.getElementById("proxPag").addEventListener("click", function() {
                 if (currentPage < totalPages) {
                     currentPage++;
                     showPage(currentPage);
                 }
             });
-
             showPage(currentPage);
         });
     </script>
 
-{% endblock %}
+
+</body>
+</html>
