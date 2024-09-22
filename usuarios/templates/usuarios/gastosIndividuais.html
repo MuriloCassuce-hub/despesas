@@ -39,6 +39,7 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             padding: 10px;
             height: 600px;
+            overflow: auto;
         }
     
         #tabprincipal {
@@ -113,6 +114,12 @@
             
         }
 
+        select{
+            border: 1px solid rgb(80, 140, 155);
+        }
+        #buscarGastoindividual{
+            background-color: rgb(82, 97, 237);
+        }
         #paginationButtons {
             display: flex;
             justify-content: space-between;
@@ -207,7 +214,7 @@
                     <option value="{{ cartao }}">{{ cartao }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" name="buscarCartoes">Buscar</button>
+            <button type="submit" name="buscarCartoes" id="buscarGastoindividual">Buscar</button>
             <button type="button" id="deletarDados">Deletar Selecionados</button>
         </form>
     
