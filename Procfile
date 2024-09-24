@@ -1,1 +1,1 @@
-wb: gunicorn despesas.wsgi --log-file -
+wb: gunicorn usuarios.wsgi --log-file -
