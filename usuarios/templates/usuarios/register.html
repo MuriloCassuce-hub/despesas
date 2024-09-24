@@ -56,8 +56,19 @@
     #botao:hover{
         background: #8c9c9f;
     }
+
+    #login{
+        width: 90%;
+        background: #7c4949;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        color: #fff;
+        border-radius: 5px;
+        transition: background 0.3s;
+        margin-bottom: 20px;
+    }
 </style>
-<!-- register.html -->
 
 <div class="caixaLogin">
     <h2>Cadastre-se</h2>
@@ -68,6 +79,7 @@
                 <button id="botao" type="submit">Registrar</button>
             </form>
         </div>
+        <a id="login" href="{% url 'login' %}">Login</a>
 </div>
 
 
