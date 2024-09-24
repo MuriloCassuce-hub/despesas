@@ -2,9 +2,10 @@ from django import forms
 from .models import User
 
 class UserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, label="Senha")
-    password_confirm = forms.CharField(widget=forms.PasswordInput, label="Confirmar Senha")
-    email = forms.CharField(label="E-mail")
+    username = forms.CharField(max_length=150, required=True, label='Usuário', help_text=None)
+    password = forms.CharField(widget=forms.PasswordInput, label="Senha", required=True)
+    password_confirm = forms.CharField(widget=forms.PasswordInput, label="Confirmar Senha", required=True)
+    email = forms.CharField(label="E-mail", required=True)
 
     class Meta:
         model = User

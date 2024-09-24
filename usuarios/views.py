@@ -209,7 +209,9 @@ def register(request):
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            return redirect('login')
+            return render(request, 'usuarios/login.html', {
+                "mensagem": "Cadastro realizado com sucesso!"
+            })
         else:
             return render(request, 'usuarios/register.html', {'form': form, 'erro': 'Verifique os dados fornecidos.'})
     else:
