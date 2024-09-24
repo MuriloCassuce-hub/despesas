@@ -1,4 +1,4 @@
-﻿﻿absl-py==2.1.0
+absl-py==2.1.0
 asgiref==3.8.1
 asttokens==2.4.1
 astunparse==1.6.3
@@ -22,8 +22,6 @@ et-xmlfile==1.1.0
 executing==2.0.1
 fastjsonschema==2.20.0
 filelock==3.15.1
-Flask==3.0.3
-Flask-Cors==4.0.1
 flatbuffers==24.3.25
 fonttools==4.53.0
 fsspec==2024.6.0
@@ -104,7 +102,6 @@ rich==13.7.1
 rpds-py==0.18.1
 scipy==1.13.1
 setuptools==70.0.0
-SimpleITK==2.4.0
 SimpleWebSocketServer==0.1.2
 six==1.16.0
 SQLAlchemy==2.0.31
@@ -115,15 +112,11 @@ tbb==2021.12.0
 tenacity==8.4.1
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
-tensorflow==2.16.1
-tensorflow-hub==0.16.1
-tensorflow-intel==2.16.1
 termcolor==2.4.0
 tf_keras==2.16.0
 threadpoolctl==3.5.0
 torch==2.3.1
 tornado==6.4.1
-tqdm==4.66.5
 traitlets==5.14.3
 twine==5.1.1
 typing==3.7.4.3
