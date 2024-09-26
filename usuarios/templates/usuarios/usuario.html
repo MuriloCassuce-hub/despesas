@@ -213,7 +213,20 @@
             flex-direction: column;
         }
 
-        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: #fff;
+            position: relative;
+            width: 100%;
+            bottom: 0;
+        }
+
+        a{
+            color: rgb(63, 144, 216);
+            text-decoration:none;
+        }
 
     </style>
 
@@ -302,21 +315,20 @@
             
         </form>
 
-
 </div>
 
 <div id="divPrincipal">
 
     
     {% if graph_json_cartao %}
-        <div id="gasto-graph-cartao"></div>
+        <div id="gasto-graph-cartao" style="display: none;"></div>
         <script id="scriptPizzaCartao" type="text/javascript">
             var graph_data_cartao = {{ graph_json_cartao|safe }};
         </script>
     {% endif %}
 
     {% if graph_json_categoria %}
-        <div id="gasto-graph-categoria"></div>
+        <div id="gasto-graph-categoria" style="display: none;"></div>
         <script type="text/javascript">
             var graph_data_categoria = {{ graph_json_categoria|safe }};
         </script>
@@ -334,6 +346,13 @@
     </div>
 
 </div>
+
+
+<footer>
+    <p>2024 Murilo Cassuce. Todos os direitos reservados.</p>
+    <h2>Contato:</h2>
+    <div id="divLink"><p><a href="https://www.linkedin.com/in/murilocassuce/">Murilo Cassuce</a></p></div>
+</footer>
 
     <script type="text/javascript">
 

@@ -5,9 +5,31 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <title>Despesas</title>
 </head>
+<style>
+    footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: #fff;
+            position: relative;
+            width: 100%;
+            bottom: 0;
+            margin-top: 20px;
+        }
+
+    a{
+            color: rgb(63, 144, 216);
+            text-decoration:none;
+        }
+</style>
 <body>
     {% block body %}
     
     {% endblock %}
+    <footer>
+        <p>2024 Murilo Cassuce. Todos os direitos reservados.</p>
+        <h2>Contato:</h2>
+        <div id="divLink"><p><a href="https://www.linkedin.com/in/murilocassuce/">Murilo Cassuce</a></p></div>
+    </footer>
 </body>
 </html>
