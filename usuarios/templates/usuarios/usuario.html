@@ -5,11 +5,45 @@
 </head>
 <body>
 
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'gastosIndividuais' %}">Gastos Individuais</a></li>
+                <li><a href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
+                <li><a href="{% url 'criar_gasto' %}"></a>Criar gasto</li>
+                <li><a id="Logout" href="{% url 'logout' %}">Log out</a></li>
+            </ul>
+        </nav>
+    </header>
+
     {% csrf_token %}
 
     <style>
+
         body {
             background-color:rgb(32, 30, 67);
+        }
+
+        header {
+            background-color: rgb(16, 97, 117);
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 15px 25px rgba(14, 25, 27, 0.507);
+        }
+
+
+        header li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        header a {
+            color: #fff;
+        }
+
+        header a:hover{
+        color: rgb(246, 208, 131);
         }
 
         #divPrincipal {
@@ -23,6 +57,7 @@
             height: 600px;
             margin-bottom: 20px;
             overflow: auto;
+            box-shadow: 0 15px 25px rgba(14, 25, 27, 0.507);
         }
 
         #h1Despesas {
@@ -169,19 +204,7 @@
             cursor: pointer;
         }
 
-        .botaologout {
-            border-radius: 5px;
-            color: rgb(255, 255, 255);
-            text-decoration: none;
-            text-align: center;
-            display: block;
-            width: 80px;
-            margin-left: 95%;
-        }
 
-        .botaologout:hover {
-            background: rgb(64, 64, 63);
-        }
         #anterPag:hover{
             background: rgb(64, 64, 63);
         } 
@@ -197,8 +220,8 @@
             flex-direction: column;
             padding: 10px;
             position: relative;
-            border: 2px solid rgb(124, 190, 251);
-            background-color: rgb(124, 190, 251);
+            border: 2px solid 333;
+            background-color: 333;
             border-radius: 15px;
         }
         #deleteCheck{
@@ -220,7 +243,6 @@
             color: #fff;
             position: relative;
             width: 100%;
-            bottom: 0;
         }
 
         a{
@@ -229,12 +251,12 @@
         }
 
     </style>
-
-    <a class="botaologout" href="{% url 'logout' %}">Log out</a>
+    
 
     <h1 id="h1Despesas">Despesas</h1>
     
     <div id="divPrincipal">
+    
 
         <form method="POST" id="formTabela" action="{% url 'criar_gasto' %}">
             {% csrf_token %}
@@ -308,8 +330,6 @@
                 <span id="pageInfo">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag">Próximo</button>
             </div>
-            <a id="botConsultIndiv" href="{% url 'gastosIndividuais' %}"> Acessar Gastos Individuais</a>
-            <a id="botConsultIndiv" href="{% url 'gastosMensais' %}">Acessar Gastos Mensais</a>
 
 
             
@@ -357,6 +377,12 @@
     <script type="text/javascript">
 
         document.addEventListener("DOMContentLoaded", function() {
+                document.getElementById("Logout").addEventListener("click", function(event){
+                event.preventDefault();
+                if (confirm("Você deseja realizar o log out?")){
+                    window.location.href = "{% url 'logout' %}";
+                }
+                })
                 document.getElementById("buscarGrafico").addEventListener("click", function(event){
                     event.preventDefault();
                     var selectedGrafico = document.getElementById("selectGrafico").value;

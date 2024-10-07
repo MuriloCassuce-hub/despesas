@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Gastos
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from .forms import UserRegistrationForm
 import plotly.graph_objects as go
 from collections import defaultdict
@@ -106,7 +106,7 @@ def criar_gasto(request):
         title="Distribuição por cartões",
         width=800,
         height=400,
-        paper_bgcolor='rgb(41, 157, 186)',
+        paper_bgcolor='rgb(252, 250, 235)',
         plot_bgcolor='white'
     )
     graph_json_cartao = fig_cartao.to_json()
@@ -128,7 +128,7 @@ def criar_gasto(request):
         title="Distribuição por categorias",
         width=800,
         height=400,
-        paper_bgcolor='rgb(41, 157, 186)',
+        paper_bgcolor='rgb(252, 250, 235)',
         plot_bgcolor='white'
     )
     graph_json_categoria = fig_categoria.to_json()
@@ -155,11 +155,13 @@ def gastosIndividuais(request):
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
     cartoes_filtrados = None
+    cartoes_filtrados = Gastos.objects.filter(cartao=cartoes[0], usuario=request.user)
     
     if request.method == "POST" and 'buscarCartoes' in request.POST:
         cartao_buscado = request.POST.get("cartao")
         if cartao_buscado:
             cartoes_filtrados = Gastos.objects.filter(cartao=cartao_buscado, usuario=request.user)
+    
     
     return render(request, 'usuarios/gastosIndividuais.html', {
         'cartoes': cartoes,
@@ -191,11 +193,15 @@ def gastosMensais(request):
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
     cartoes_filtrados = None
+    agora = datetime.now()
+    agora_formatado = agora.strftime("%m/%Y") 
+    gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
 
     if request.method == "POST" and 'consultaMensal' in request.POST:
         consultar_data = request.POST.get("data_inicial_formatada")
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
+
     return render(request, "usuarios/gastosMensais.html", {
         "gastos": gastos_filtrados,
         "datas_disponiveis": datas_disponiveis_ordenadas,

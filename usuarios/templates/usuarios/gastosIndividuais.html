@@ -40,6 +40,7 @@
             padding: 10px;
             height: 600px;
             overflow: auto;
+            box-shadow: 5px 15px 25px rgba(14, 25, 27, 0.507);
         }
     
         #tabprincipal {
@@ -119,6 +120,7 @@
         }
         #buscarGastoindividual{
             background-color: rgb(82, 97, 237);
+            color: #fff;
         }
         #paginationButtons {
             display: flex;
@@ -158,9 +160,7 @@
         }
     </style>
 
-    <a class="botaologout" href="{% url 'logout' %}">Log out</a>
-
-    <h1 id="h1Despesas" >Gastos com Cartões</h1>
+    <h1 id="h1Despesas" >Gastos por cartões</h1>
 
 <div id="divPrincipal">
     
@@ -223,13 +223,20 @@
             <span id="pageInfo">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
             <button id="proxPag">Próximo</button>
         </div>
-        <a id="pgCriar_gasto" href="{% url 'criar_gasto' %}">Acessar Criação de Gastos</a>
-        <a id="pgCriar_gasto" href="{% url 'gastosMensais' %}">Acessar Gastos Mensais</a>
+
     </div>
 </div>
     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("paginatualGastosIndividuais").removeAttribute("href");
+            document.getElementById("paginatualGastosIndividuais").style.color = "black";
+            document.getElementById("Logout").addEventListener("click", function(event){
+            event.preventDefault();
+            if (confirm("Você deseja realizar o log out?")){
+                window.location.href = "{% url 'logout' %}";
+            }
+            })
             document.getElementById("deletarDados").addEventListener("click", function(event) {
             event.preventDefault();
             if (confirm(`Você tem certeza que deseja apagar?`)) {

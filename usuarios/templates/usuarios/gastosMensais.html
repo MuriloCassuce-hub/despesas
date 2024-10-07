@@ -40,6 +40,7 @@
             padding: 10px;
             height: 600px;
             overflow: auto;
+            box-shadow: 0 15px 25px rgba(14, 25, 27, 0.507);
         }
     
         #tabprincipal {
@@ -164,9 +165,7 @@
     </style>
     
 
-    <a class="botaologout" href="{% url 'logout' %}">Log out</a>
-
-    <h1 id="h1Despesas" >Gastos com Cartões</h1>
+    <h1 id="h1Despesas" >Gastos Mensais</h1>
 
     <div id="divPrincipal">
         <form method="POST" id="formTabela" action="{% url 'gastosMensais' %}">
@@ -229,13 +228,19 @@
                 <span id="pageInfo2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag2">Próximo</button>
             </div>
-            <a id="pgCriar_gasto" href="{% url 'criar_gasto' %}">Acessar Criação de Gastos</a>
-            <a id="pgCriar_gasto" href="{% url 'gastosIndividuais' %}">Acessar Gastos Individuais</a>
         </div>
     </div>
     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("paginatualGastosMensais").removeAttribute("href");
+        document.getElementById("paginatualGastosMensais").style.color = "black";
+        document.getElementById("Logout").addEventListener("click", function(event){
+            event.preventDefault();
+            if (confirm("Você deseja realizar o log out?")){
+                window.location.href = "{% url 'logout' %}";
+            }
+        })
         document.getElementById("deletarDados").addEventListener("click", function(event) {
             event.preventDefault();
             if (confirm(`Você tem certeza que deseja apagar?`)) {
