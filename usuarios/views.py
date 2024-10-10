@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .models import Gastos
+from .models import Gastos, EntradaDinheiro
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
 from .forms import UserRegistrationForm
@@ -27,7 +27,7 @@ def login_view(request):
         usuario = authenticate(request, username = usuario, password = senha)
         if usuario is not None:
             login(request, usuario)
-            return HttpResponseRedirect(reverse("criar_gasto"))
+            return HttpResponseRedirect(reverse("gastosMensais"))
         
         else:
             return render(request, "usuarios/login.html", {
@@ -155,17 +155,24 @@ def gastosIndividuais(request):
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
     cartoes_filtrados = None
-    cartoes_filtrados = Gastos.objects.filter(cartao=cartoes[0], usuario=request.user)
+    total_entrada = 0
+
+    
+    if Gastos.objects.filter(usuario=request.user).exists():
+        cartoes_filtrados = Gastos.objects.filter(cartao=cartoes[0], usuario=request.user)
     
     if request.method == "POST" and 'buscarCartoes' in request.POST:
         cartao_buscado = request.POST.get("cartao")
         if cartao_buscado:
             cartoes_filtrados = Gastos.objects.filter(cartao=cartao_buscado, usuario=request.user)
     
-    
+    if cartoes_filtrados != None:
+        total_entrada = sum(gasto.valor_parcelado() for gasto in cartoes_filtrados)
+
     return render(request, 'usuarios/gastosIndividuais.html', {
         'cartoes': cartoes,
-        'gastos': cartoes_filtrados
+        'gastos': cartoes_filtrados,
+        'total_entrada': total_entrada,
     })
 
 
@@ -173,12 +180,11 @@ def gastosIndividuais(request):
 def gastosMensais(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
     datas_disponiveis = Gastos.objects.filter(usuario=request.user).values_list('data_inicial', flat=True).distinct()
     lista_datas = list(datas_disponiveis)
     lista_datas_sort = sorted(lista_datas, key=lambda x: datetime.strptime(x, "%m/%Y"))
     datas_disponiveis_ordenadas = lista_datas_sort
-    gastos_filtrados = None
-    nenhuma_data = False
     if request.method == 'POST':
 
         ids_para_deletar = request.POST.get('deletar_selecionados', '')
@@ -192,7 +198,6 @@ def gastosMensais(request):
             return HttpResponseRedirect(reverse('gastosIndividuais'))
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
-    cartoes_filtrados = None
     agora = datetime.now()
     agora_formatado = agora.strftime("%m/%Y") 
     gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
@@ -202,11 +207,78 @@ def gastosMensais(request):
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
 
+    if gastos_filtrados.exists():
+        total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
+        datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
+        total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+        total_saldo = total_saldo - total_entrada
+    else:
+        total_entrada = 0
+
     return render(request, "usuarios/gastosMensais.html", {
         "gastos": gastos_filtrados,
         "datas_disponiveis": datas_disponiveis_ordenadas,
+        "total_entrada": total_entrada,
+        "total_saldo": total_saldo,
     })
+
+def AdicionarSaldo(request):
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
     
+    if request.method == 'POST':
+
+        ids_para_deletar = request.POST.get('deletar_selecionados', '')
+
+        if ids_para_deletar:
+            ids_para_deletar = ids_para_deletar.split(',')
+            
+            excluirSaldo = EntradaDinheiro.objects.filter(id__in=ids_para_deletar, usuario=request.user)
+            excluirSaldo.delete()
+            
+            return HttpResponseRedirect(reverse('AdicionarSaldo'))
+
+    if request.method == 'POST' and 'AdicionarSaldo' in request.POST:
+        saldo = request.POST.get("saldo")
+        data_de_entrada_saldo = request.POST.get("DataEntradaSaldo")
+        origem = request.POST.get("Origem").capitalize()
+        copia_mes =  data_de_entrada_saldo[5:7]
+        copia_ano = data_de_entrada_saldo[0:4]
+        data_de_entrada_saldo = str(copia_mes) + "/" + str(copia_ano)
+
+        if EntradaDinheiro.objects.filter(usuario=request.user, origem=origem, DataEntradaSaldo=data_de_entrada_saldo).exists():
+            entrada = EntradaDinheiro.objects.get(usuario=request.user, origem=origem, DataEntradaSaldo=data_de_entrada_saldo)
+            entrada.origem = origem
+            entrada.valor_de_entrada += Decimal(saldo)
+            entrada.save()
+            return HttpResponseRedirect(reverse('AdicionarSaldo'))
+        else:
+            EntradaDinheiro.objects.create(usuario=request.user, origem = origem, valor_de_entrada=Decimal(saldo), DataEntradaSaldo=data_de_entrada_saldo)
+            return HttpResponseRedirect(reverse('AdicionarSaldo'))    
+    
+    datas_disponiveis = EntradaDinheiro.objects.filter(usuario=request.user).values_list('DataEntradaSaldo', flat=True).distinct()
+    lista_datas = list(datas_disponiveis)
+    lista_datas_sort = sorted(lista_datas, key=lambda x: datetime.strptime(x, "%m/%Y"))
+    datas_disponiveis_ordenadas = lista_datas_sort
+
+    agora = datetime.now()
+    agora_formatado = agora.strftime("%m/%Y") 
+    datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
+    
+    if request.method == "POST" and 'consultaMensal' in request.POST:
+        consultar_data = request.POST.get("data_inicial_formatada")
+        if consultar_data:
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
+        else:
+            consultar_data = agora_formatado
+    total_entrada = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+    return render(request, "usuarios/AdicionarSaldo.html", {
+        "entradadinheiro": datas_filtradas,
+        "datas_disponiveis": datas_disponiveis_ordenadas,
+        "total_entrada": total_entrada,
+
+    })
 
 def register(request):
     if request.method == 'POST':

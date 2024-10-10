@@ -8,10 +8,12 @@
     <header>
         <nav>
             <ul>
+                <li><a href="{% url 'AdicionarSaldo' %}">Adicionar Saldo</a></li>
+                <li style="color: black; border: 1px solid rgb(255, 255, 255); padding: 4px; border-radius: 5px; background-color: white;"><a href="{% url 'criar_gasto' %}"></a>Criar Gastos</li>
                 <li><a href="{% url 'gastosIndividuais' %}">Gastos Individuais</a></li>
                 <li><a href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
-                <li><a href="{% url 'criar_gasto' %}"></a>Criar gasto</li>
                 <li><a id="Logout" href="{% url 'logout' %}">Log out</a></li>
+                
             </ul>
         </nav>
     </header>
@@ -68,6 +70,11 @@
         
         }
 
+        #nometabela{
+           background-color: rgb(124, 195, 243);
+           font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
         #tabprincipal {
             border-collapse: collapse;
             background-color: rgb(238, 238, 238);
@@ -120,19 +127,7 @@
             flex-direction: column;
             align-items: center;
             margin-left: 20px;
-        }
-        
-        #formGastos2{
-            align-self: center;
-            width: 300px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-left: 20px;
+            padding-top: 10px;
         }
 
         #formTabela{
@@ -154,19 +149,6 @@
             color: white;
             cursor: pointer;
             text-align: center;
-        }
-
-        #botConsultIndiv {
-            color: white;
-            text-decoration: none;
-            background-color: rgb(32, 151, 255);
-            border-radius: 5px;
-            padding: 8px;
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            width: 100%;
-            border-radius: 5px;
         }
 
         #pageInfo, #pageInfo2 {
@@ -195,6 +177,12 @@
             margin-bottom: 10px;
             padding: 10px;
             box-sizing: border-box;
+        }
+
+        #backgroundForm{
+            background-color: rgba(255, 145, 0, 0.186);
+            padding: 5px;
+            border-radius: 10px;
         }
 
         
@@ -253,7 +241,7 @@
     </style>
     
 
-    <h1 id="h1Despesas">Despesas</h1>
+    <h1 id="h1Despesas">Criar Gastos</h1>
     
     <div id="divPrincipal">
     
@@ -264,6 +252,9 @@
         
             <table id="tabprincipal">
                 <thead>
+                    <tr>
+                        <td id="NomeTabela" colspan="9"><strong>Últimos gastos adicionados</strong></td>
+                    </tr>
                     <tr>
                         <th>Selecionar</th>
                         <th>ID</th>
@@ -297,33 +288,33 @@
                 </tbody>
             </table>
         </form>
-
+        
         <form id="formGastos" action="{% url 'criar_gasto' %}" method="post">
             {% csrf_token %}
-            <input class="inputformCriarGastos" type="text" name="cartao" placeholder="Cartão" required>
+            <div id="backgroundForm">
+                <input class="inputformCriarGastos" type="text" name="cartao" placeholder="Cartão" required>
+                <input class="inputformCriarGastos" type="text" name="item" placeholder="Item" required>
+                <select name="categoria" required>
+                    <option value="" disabled selected>Selecione uma categoria</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Entretenimento">Entretenimento</option>
+                    <option value="Moradia">Moradia</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Educação">Educação</option>
+                    <option value="Serviços">Serviços</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                
+                <input class="inputformCriarGastos" type="number" name="valor" step="0.01" placeholder="Valor" required min="0" max="99999999" step="0.0001">
+                <input class="inputformCriarGastos" type="number" name="parcelas" placeholder="Parcelas" min="1" max="120" step="1" required>
+                <input class="inputformCriarGastos" type="month" name="data_inicial" placeholder="Data da Primeira Parcela (mm/yy)">
 
-            <input class="inputformCriarGastos" type="text" name="item" placeholder="Item" required>
-        
-            <select name="categoria" required>
-                <option value="" disabled selected>Selecione uma categoria</option>
-                <option value="Alimentação">Alimentação</option>
-                <option value="Transporte">Transporte</option>
-                <option value="Entretenimento">Entretenimento</option>
-                <option value="Moradia">Moradia</option>
-                <option value="Lazer">Lazer</option>
-                <option value="Educação">Educação</option>
-                <option value="Serviços">Serviços</option>
-                <option value="Saúde">Saúde</option>
-                <option value="Outros">Outros</option>
-            </select>
 
-            <input class="inputformCriarGastos" type="number" name="valor" step="0.01" placeholder="Valor" required min="0" max="99999999" step="0.0001">
-            <input class="inputformCriarGastos" type="number" name="parcelas" placeholder="Parcelas" min="1" max="120" step="1" required>
-            <input class="inputformCriarGastos" type="date" name="data_inicial" placeholder="Data da Primeira Parcela (mm/yy)">
-
-
-            <button type="submit" name="criar_gasto">Criar gasto</button>
-            <button type="button" id="deletarDados">Deletar Selecionados</button>
+                <button type="submit" name="criar_gasto">Criar gasto</button>
+                <button type="button" id="deletarDados">Deletar</button>
+            </div>
             
             <div id="paginationButtons">
                 <button id="anterPag">Anterior</button>

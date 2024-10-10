@@ -6,6 +6,9 @@
     <title>Despesas</title>
 </head>
 <style>
+    body {
+        background-color:rgb(32, 30, 67);
+    }    
 
     header {
         background-color: rgb(16, 97, 117);
@@ -48,9 +51,10 @@
     <header>
         <nav>
             <ul>
+                <li><a id="PaginatualAdicionarSaldo" href="{% url 'AdicionarSaldo' %}">Adicionar Saldo</a></li>
+                <li><a href="{% url 'criar_gasto' %}">Criar Gastos</a></li>
                 <li><a id="paginatualGastosIndividuais" href="{% url 'gastosIndividuais' %}">Gastos Individuais</a></li>
                 <li><a id="paginatualGastosMensais" href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
-                <li><a href="{% url 'criar_gasto' %}">Criar gasto</a></li>
                 <li><a id="Logout"href="{% url 'logout' %}">Log out</a></li>
             </ul>
         </nav>

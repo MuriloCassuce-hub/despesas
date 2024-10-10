@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.db.models import Sum
 
 # Create your models here.
 
@@ -34,10 +35,25 @@ class Gastos(models.Model):
             return valor_parcelado
         return 0.00
     
+    def total_gastos(self):
+        total_de_gastos = Gastos.objects.filter(usuario = self.usuario, data_inicial = self.data_inicial).aggregate(sum('valor_parcelado'))
+        return total_de_gastos['valor_parcelado__sum']
+    
     def __str__(self):
-        return f"{self.usuario.username} {self.cartao} {self.item} {self.categoria} {self.valor} {self.parcelas} {self.parcelado} {self.valor_parcelado():.2f} {self.data_inicial}"
+        return f"{self.usuario.username} {self.total_gastos} {self.cartao} {self.item} {self.categoria} {self.valor} {self.parcelas} {self.parcelado} {self.valor_parcelado():.2f} {self.data_inicial}"
 
+class EntradaDinheiro(models.Model):
+    origem = models.CharField(max_length=70)
+    valor_de_entrada = models.DecimalField(max_digits=1000000, decimal_places=2)
+    DataEntradaSaldo = models.CharField(max_length=7)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    def total(self):
+        total_entradas = EntradaDinheiro.objects.filter(usuario = self.usuario, DataEntradaSaldo=self.DataEntradaSaldo).aggregate(Sum('valor_de_entrada'))
+        return total_entradas['valor_de_entrada__sum']
+
+    def __str__(self):
+        return f"{self.usuario.username} {self.valor_de_entrada} {self.DataEntradaSaldo} {self.origem} {self.total()}"
 
 #Tabela de Pessoas
 class User(AbstractUser):

@@ -10,4 +10,5 @@ urlpatterns = [
     path('gastosIndividuais/', views.gastosIndividuais, name="gastosIndividuais"),
     path('gastosMensais', views.gastosMensais, name="gastosMensais"),
     path('register/', views.register, name='register'),
+    path('AdicionarSaldo/', views.AdicionarSaldo, name='AdicionarSaldo'),
 ]

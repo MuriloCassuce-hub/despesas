@@ -158,6 +158,16 @@
             background-color: rgb(228, 84, 84);
             color: white;
         }
+        .total{
+            background-color: rgb(157, 175, 242);
+            color: rgb(228, 84, 84);
+        }
+
+        #TestBackGround{
+            background-color: rgba(255, 145, 0, 0.186);
+            padding: 5px;
+            border-radius: 10px;
+        }
     </style>
 
     <h1 id="h1Despesas" >Gastos por cartões</h1>
@@ -197,9 +207,13 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9">Selecione um cartão.</td>
+                    <td colspan="9">Nenhum cartão encontrado.</td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td class="total" colspan="8"><strong>Total</strong></td>
+                    <td class="total" colspan="1"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
+                </tr>
             </tbody>
         </table>
     </form>
@@ -207,15 +221,18 @@
     <div id="formConsultCart">
         <form method="post" action="{% url 'gastosIndividuais' %}">
             {% csrf_token %}
+            <div id="TestBackGround">
             <label for="cartao">Escolha um cartão:</label>
             <select id="cartao" name="cartao">
-                <option value="">Selecione um cartão</option>
                 {% for cartao in cartoes %}
                     <option value="{{ cartao }}">{{ cartao }}</option>
+                    {% empty %}
+                    <option>Nenhum cartão encontrado</option>
                 {% endfor %}
             </select>
-            <button type="submit" name="buscarCartoes" id="buscarGastoindividual">Buscar</button>
-            <button type="button" id="deletarDados">Deletar Selecionados</button>
+            <button type="submit" name="buscarCartoes" id="buscarGastoindividual">Consultar</button>
+            <button type="button" id="deletarDados">Deletar</button>
+            </div>
         </form>
     
         <div id="paginationButtons">
@@ -231,6 +248,10 @@
     document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("paginatualGastosIndividuais").removeAttribute("href");
             document.getElementById("paginatualGastosIndividuais").style.color = "black";
+            document.getElementById("paginatualGastosIndividuais").style.border = "1px solid rgb(255, 255, 255)"
+            document.getElementById("paginatualGastosIndividuais").style.padding = "4px";
+            document.getElementById("paginatualGastosIndividuais").style.borderRadius = "5px"
+            document.getElementById("paginatualGastosIndividuais").style.backgroundColor = "white";
             document.getElementById("Logout").addEventListener("click", function(event){
             event.preventDefault();
             if (confirm("Você deseja realizar o log out?")){
