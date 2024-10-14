@@ -103,7 +103,7 @@ def criar_gasto(request):
         hovertemplate="%{label}<br>R$ %{value:,.2f}<br>%{percent}<extra></extra>",
     )
     fig_cartao.update_layout(
-        title="Distribuição por cartões",
+        title={'text': "Distribuição total por cartões", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
         width=800,
         height=400,
         paper_bgcolor='rgb(252, 250, 235)',
@@ -125,7 +125,7 @@ def criar_gasto(request):
         hovertemplate="%{label}<br>R$ %{value:,.2f}<br>%{percent}<extra></extra>",
     )
     fig_categoria.update_layout(
-        title="Distribuição por categorias",
+        title={'text': "Distribuição total por categoria", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
         width=800,
         height=400,
         paper_bgcolor='rgb(252, 250, 235)',
@@ -207,19 +207,67 @@ def gastosMensais(request):
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
 
+    
     if gastos_filtrados.exists():
         total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
         datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
         total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
         total_saldo = total_saldo - total_entrada
     else:
+        total_saldo = 0
         total_entrada = 0
+
+    #Por cartão
+    gastos_por_cartao = defaultdict(Decimal)
+    for gasto in gastos_filtrados:
+        gastos_por_cartao[gasto.cartao] += Decimal(gasto.valor_parcelado())
+
+    cartoes = list(gastos_por_cartao.keys())
+    valores_totais = [float(valor) for valor in gastos_por_cartao.values()]
+
+    fig_cartao = go.Figure(data=[go.Pie(labels=cartoes, values=valores_totais)])
+    fig_cartao.update_traces(
+        textinfo="percent",
+        hovertemplate="%{label}<br>R$ %{value:,.2f}<br>%{percent}<extra></extra>",
+    )
+    fig_cartao.update_layout(
+        title={'text': "Distribuição por cartões", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
+        width=800,
+        height=400,
+        paper_bgcolor='rgb(252, 250, 235)',
+        plot_bgcolor='white'
+    )
+    graph_json_cartao = fig_cartao.to_json()
+
+    #Por categoria
+    gastos_por_categoria = defaultdict(Decimal)
+    for gasto in gastos_filtrados:
+        gastos_por_categoria[gasto.categoria] += Decimal(gasto.valor_parcelado())
+
+    categorias = list(gastos_por_categoria.keys())
+    valores_categoria = [float(valor) for valor in gastos_por_categoria.values()]
+
+    fig_categoria = go.Figure(data=[go.Pie(labels=categorias, values=valores_categoria)])
+    fig_categoria.update_traces(
+        textinfo="percent",
+        hovertemplate="%{label}<br>R$ %{value:,.2f}<br>%{percent}<extra></extra>",
+    )
+    fig_categoria.update_layout(
+        title={'text': "Distribuição por categoria", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
+        width=800,
+        height=400,
+        paper_bgcolor='rgb(252, 250, 235)',
+        plot_bgcolor='white'
+    )
+    graph_json_categoria = fig_categoria.to_json()
 
     return render(request, "usuarios/gastosMensais.html", {
         "gastos": gastos_filtrados,
         "datas_disponiveis": datas_disponiveis_ordenadas,
         "total_entrada": total_entrada,
         "total_saldo": total_saldo,
+        "graph_json_cartao": graph_json_cartao,
+        "graph_json_categoria": graph_json_categoria,
     })
 
 def AdicionarSaldo(request):

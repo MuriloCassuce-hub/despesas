@@ -8,11 +8,11 @@
     <header>
         <nav>
             <ul>
-                <li><a href="{% url 'AdicionarSaldo' %}">Adicionar Saldo</a></li>
+                <li><a id="PaginatualAdicionarSaldo" href="{% url 'AdicionarSaldo' %}">Saldos</a></li>
                 <li style="color: black; border: 1px solid rgb(255, 255, 255); padding: 4px; border-radius: 5px; background-color: white;"><a href="{% url 'criar_gasto' %}"></a>Criar Gastos</li>
-                <li><a href="{% url 'gastosIndividuais' %}">Gastos Individuais</a></li>
-                <li><a href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
-                <li><a id="Logout" href="{% url 'logout' %}">Log out</a></li>
+                <li><a id="paginatualGastosIndividuais" href="{% url 'gastosIndividuais' %}">Gastos por cartões</a></li>
+                <li><a id="paginatualGastosMensais" href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
+                <li><a id="Logout"href="{% url 'logout' %}">Log out</a></li>
                 
             </ul>
         </nav>
@@ -48,7 +48,7 @@
         color: rgb(246, 208, 131);
         }
 
-        #divPrincipal {
+        #divPrincipal, #divPrincipal2 {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -220,9 +220,6 @@
             color: white;
         }
 
-        #graficoSelecaoTipo{
-            flex-direction: column;
-        }
 
         footer {
             text-align: center;
@@ -271,7 +268,7 @@
                     {% for gasto in gastos|slice:"::-1" %}
                     <tr id="tr_criar_gasto" class="gasto-item">
                         <td><input id="deleteCheck" type="checkbox" name="deletar" value="{{ gasto.id }}"></td>
-                        <td>{{ gasto.id }}</td>
+                        <td id="testeID">{{ gasto.id }}</td>
                         <td>{{ gasto.cartao }}</td>
                         <td>{{ gasto.item }}</td>
                         <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
@@ -328,7 +325,9 @@
 
 </div>
 
-<div id="divPrincipal">
+<h1 id="h1Despesas" >Visualização de dados</h1>
+
+<div id="divPrincipal2">
 
     
     {% if graph_json_cartao %}
@@ -348,11 +347,10 @@
     <div id="subdiv">
         <form id="formGastos">
         <select name="tipoGrafico" id="selectGrafico">
-            <option value="selecionar">Selecione o tipo de gráfico</option>
-            <option value="graficoCartaoPizza">Gráfico pelo cartão</option>
-            <option value="graficoCategoriaPizza">Gráfico pela categoria</option>
+            <option value="graficoCartaoPizza">Gráfico por cartão</option>
+            <option value="graficoCategoriaPizza">Gráfico por categoria</option>
         </select>
-        <button id="buscarGrafico" name="buscarGrafico">OK</button>
+        <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
     </form>
     </div>
 
@@ -387,9 +385,28 @@
                         Plotly.newPlot('gasto-graph-categoria', graph_data_categoria.data, graph_data_categoria.layout);
                     }
                 });
+
+                let valorSaldoTexto = document.getElementById("testeID");
+        
+                if(!valorSaldoTexto){
+                    document.getElementById("gasto-graph-cartao").style.display = "none";
+                    document.getElementById("gasto-graph-categoria").style.display = "none";
+                    document.getElementById("subdiv").style.display = "none";
+                    novoelemento = document.createElement("h2")
+                    novoelemento.innerText = "Sem dados para visualizar"
+                    novoelemento.style.color = "white"
+                    document.getElementById("divPrincipal2").appendChild(novoelemento);
+                } else{
+                window.onload = function() {
+                document.getElementById("gasto-graph-cartao").style.display = "block";
+                Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
+                };}
             });        
+        
 
         document.addEventListener("DOMContentLoaded", function() {
+
+
         document.getElementById("deletarDados").addEventListener("click", function(event) {
             event.preventDefault();
             if (confirm(`Você tem certeza que deseja apagar?`)) {

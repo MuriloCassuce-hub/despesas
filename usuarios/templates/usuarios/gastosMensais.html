@@ -68,7 +68,7 @@
             background-color: rgba(246, 208, 131, 0.378);
         }
     
-        #formGastos2 {
+        #formGastos2, #formGastos {
             align-self: flex-start;
             width: 300px;
             padding: 20px;
@@ -154,9 +154,34 @@
 
         .saldorestante{
             background-color: rgb(157, 175, 242);
-            color: rgb(228, 84, 84);
+            color: rgb(255, 0, 0);
         }
-    
+
+        #SaldoVerde{
+            color: green;
+        }
+
+        #menos{
+            color: black;
+        }
+
+        #genGraph{
+            margin-bottom: 20px;
+        }
+
+        #gasto-graph-cartao, #gasto-graph-categoria{
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
+            border: 2px solid 333;
+            background-color: 333;
+            border-radius: 15px;
+        }
+
+        #buscarGrafico{
+            background-color: rgb(82, 97, 237);
+            color: white;
+        }
     </style>
     
 
@@ -204,8 +229,8 @@
                         <td class="total" colspan="2"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
                     </tr>
                     <tr>
-                        <td class="saldorestante" colspan="7"><strong>Saldo - Total: </strong></td>
-                        <td class="saldorestante" id="saldorestante" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
+                        <td class="saldorestante" colspan="7"><strong><strong id="SaldoVerde">Saldo</strong> <strong id="menos">-</strong> Total<strong id="menos">:</strong> </strong></td>
+                        <td class="saldorestante" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
                     </tr>
                 </tbody>
             </table>
@@ -236,7 +261,29 @@
     <h1 id="h1Despesas" >Visualização de dados</h1>
 
     <div id="divPrincipal">
+        {% if graph_json_cartao %}
+        <div id="gasto-graph-cartao" style="display: none;"></div>
+        <script id="scriptPizzaCartao" type="text/javascript">
+            var graph_data_cartao = {{ graph_json_cartao|safe }};
+        </script>
+    {% endif %}
 
+    {% if graph_json_categoria %}
+        <div id="gasto-graph-categoria" style="display: none;"></div>
+        <script type="text/javascript">
+            var graph_data_categoria = {{ graph_json_categoria|safe }};
+        </script>
+    {% endif %}
+
+    <div id="subdiv">
+        <form id="formGastos">
+        <select name="tipoGrafico" id="selectGrafico">
+            <option value="graficoCartaoPizza">Gráfico por cartão</option>
+            <option value="graficoCategoriaPizza">Gráfico por categoria</option>
+        </select>
+        <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
+    </form>
+    </div>
     </div>
     
 <script>
@@ -248,6 +295,14 @@
         document.getElementById("paginatualGastosMensais").style.borderRadius = "5px"
         document.getElementById("paginatualGastosMensais").style.backgroundColor = "white";
 
+        let valorSaldoTexto = document.getElementById("saldorestantecalculo").innerText;
+        let valorSaldo = parseFloat(valorSaldoTexto.replace("R$", "").replace(",", "").trim());
+
+        if (valorSaldo > 0) {
+            document.getElementById("saldorestantecalculo").style.color = 'green';
+        } else {
+            document.getElementById("saldorestantecalculo").style.color = 'red';
+        }
         
         document.getElementById("Logout").addEventListener("click", function(event){
             event.preventDefault();
@@ -296,6 +351,24 @@
                 }
             });
             showPage(currentPage2);
+
+            document.getElementById("buscarGrafico").addEventListener("click", function(event){
+                    event.preventDefault();
+                    var selectedGrafico = document.getElementById("selectGrafico").value;
+                    document.getElementById("gasto-graph-cartao").style.display = "none";
+                    document.getElementById("gasto-graph-categoria").style.display = "none";
+                    if (selectedGrafico === "graficoCartaoPizza") {
+                        document.getElementById("gasto-graph-cartao").style.display = "block";
+                        Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
+                    } else if (selectedGrafico === "graficoCategoriaPizza") {
+                        document.getElementById("gasto-graph-categoria").style.display = "block";
+                        Plotly.newPlot('gasto-graph-categoria', graph_data_categoria.data, graph_data_categoria.layout);
+                    }
+                });
+                window.onload = function() {
+                document.getElementById("gasto-graph-cartao").style.display = "block";
+                Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
+                };
         });
 </script>
 
