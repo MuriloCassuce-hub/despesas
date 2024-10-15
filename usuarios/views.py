@@ -207,15 +207,16 @@ def gastosMensais(request):
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
 
-    
     if gastos_filtrados.exists():
-        total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
-        datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
-        total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
-        total_saldo = total_saldo - total_entrada
+            total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
+            total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+            total_saldo = total_saldo - total_entrada
     else:
         total_saldo = 0
-        total_entrada = 0
+        total_entrada = 0    
+
+    
 
     #Por cartão
     gastos_por_cartao = defaultdict(Decimal)
