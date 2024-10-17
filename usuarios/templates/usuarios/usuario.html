@@ -209,7 +209,7 @@
             padding: 10px;
             position: relative;
             border: 2px solid 333;
-            background-color: 333;
+            background-color: rgb(252, 250, 235);
             border-radius: 15px;
         }
         #deleteCheck{
@@ -235,10 +235,13 @@
             text-decoration:none;
         }
 
+        .h3info{
+            color: blue;
+        }
     </style>
     
 
-    <h1 id="h1Despesas">Criar Gastos</h1>
+    <h1 id="h1Despesas">Criação de Gastos</h1>
     
     <div id="divPrincipal">
     
@@ -287,6 +290,7 @@
         </form>
         
         <form id="formGastos" action="{% url 'criar_gasto' %}" method="post">
+            <h3 class="h3Info">Criar de gasto:</h3>
             {% csrf_token %}
             <div id="backgroundForm">
                 <input class="inputformCriarGastos" type="text" name="cartao" placeholder="Cartão" required>

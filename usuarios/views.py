@@ -16,7 +16,7 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    return HttpResponseRedirect(reverse("criar_gasto"))
+    return HttpResponseRedirect(reverse("gastosMensais"))
 
 #Página de login
 def login_view(request):
@@ -195,28 +195,46 @@ def gastosMensais(request):
             gastos = Gastos.objects.filter(id__in=ids_para_deletar, usuario=request.user)
             gastos.delete()
             
-            return HttpResponseRedirect(reverse('gastosIndividuais'))
+            return HttpResponseRedirect(reverse('gastosMensais'))
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
     agora = datetime.now()
     agora_formatado = agora.strftime("%m/%Y") 
     gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
-
+    
     if request.method == "POST" and 'consultaMensal' in request.POST:
         consultar_data = request.POST.get("data_inicial_formatada")
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
 
-    if gastos_filtrados.exists():
+        if gastos_filtrados.exists():
+                total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
+                datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
+                total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+                total_saldo = total_saldo - total_entrada
+
+    else:
+        verifica = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
+        if not gastos_filtrados.exists():
+            total_entrada = 0
+            total_saldo = 0
+        elif agora_formatado not in verifica:
+            primeira_data = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
+            consultar_data = primeira_data[0]
+            gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
+    
             total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
-            total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
-            total_saldo = total_saldo - total_entrada
-    else:
-        total_saldo = 0
-        total_entrada = 0    
-
+            total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada
+        else:
+            gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
     
+            total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
+            total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada
+
+
+
 
     #Por cartão
     gastos_por_cartao = defaultdict(Decimal)
@@ -310,10 +328,20 @@ def AdicionarSaldo(request):
     lista_datas = list(datas_disponiveis)
     lista_datas_sort = sorted(lista_datas, key=lambda x: datetime.strptime(x, "%m/%Y"))
     datas_disponiveis_ordenadas = lista_datas_sort
+    
+    if datas_disponiveis.exists():
+        agora = datetime.now()
+        agora_formatado = agora.strftime("%m/%Y") 
+        datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
+        primeiro_mes = EntradaDinheiro.objects.filter(usuario = request.user).values_list('DataEntradaSaldo', flat=True).distinct()
+        if agora_formatado not in datas_disponiveis:
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=primeiro_mes[0], usuario=request.user)
+        total_entrada = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+    else:
+        datas_filtradas = EntradaDinheiro.objects.none()
+        total_entrada = 0
 
-    agora = datetime.now()
-    agora_formatado = agora.strftime("%m/%Y") 
-    datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
+
     
     if request.method == "POST" and 'consultaMensal' in request.POST:
         consultar_data = request.POST.get("data_inicial_formatada")
@@ -321,7 +349,6 @@ def AdicionarSaldo(request):
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
         else:
             consultar_data = agora_formatado
-    total_entrada = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
     return render(request, "usuarios/AdicionarSaldo.html", {
         "entradadinheiro": datas_filtradas,
         "datas_disponiveis": datas_disponiveis_ordenadas,

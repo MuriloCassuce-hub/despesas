@@ -168,6 +168,9 @@
             padding: 5px;
             border-radius: 10px;
         }
+        .h3Info{
+        color: rgb(0, 21, 255);
+        }
     </style>
 
     <h1 id="h1Despesas" >Gastos por cartões</h1>
@@ -219,10 +222,10 @@
     </form>
     
     <div id="formConsultCart">
+        <h3 class="h3Info">Escolha um cartão: </h3>
         <form method="post" action="{% url 'gastosIndividuais' %}">
             {% csrf_token %}
             <div id="TestBackGround">
-            <label for="cartao">Escolha um cartão:</label>
             <select id="cartao" name="cartao">
                 {% for cartao in cartoes %}
                     <option value="{{ cartao }}">{{ cartao }}</option>
