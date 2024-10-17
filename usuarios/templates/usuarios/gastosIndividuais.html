@@ -86,6 +86,10 @@
 
         }
 
+        #formGastos{
+            width: 100%;
+        }
+
         #pgCriar_gasto{
             color: white;
             text-decoration: none;
@@ -223,7 +227,7 @@
     
     <div id="formConsultCart">
         <h3 class="h3Info">Escolha um cartão: </h3>
-        <form method="post" action="{% url 'gastosIndividuais' %}">
+        <form id="formGastos" method="post" action="{% url 'gastosIndividuais' %}">
             {% csrf_token %}
             <div id="TestBackGround">
             <select id="cartao" name="cartao">
