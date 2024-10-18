@@ -200,7 +200,7 @@ def gastosMensais(request):
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
     agora = datetime.now()
     agora_formatado = agora.strftime("%m/%Y") 
-    gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
+    gastos_filtrados = Gastos.objects.filter(usuario=request.user)
     
     if request.method == "POST" and 'consultaMensal' in request.POST:
         consultar_data = request.POST.get("data_inicial_formatada")
@@ -212,6 +212,9 @@ def gastosMensais(request):
                 datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
                 total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
                 total_saldo = total_saldo - total_entrada
+        else:
+            total_entrada = 0
+            total_saldo = 0
 
     else:
         verifica = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
@@ -228,7 +231,6 @@ def gastosMensais(request):
             total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada
         else:
             gastos_filtrados = Gastos.objects.filter(data_inicial=agora_formatado, usuario=request.user)
-    
             total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
             total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada

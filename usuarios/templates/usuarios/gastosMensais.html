@@ -29,6 +29,12 @@
             background: rgb(64, 64, 63);
         }
     
+        #mes_atual{
+            font-size: 140%;
+            background-color:rgba(251, 255, 0, 0.708);
+            color: black;
+        }
+
         #divPrincipal, #divPrincipal2{
             display: flex;
             justify-content: center;
@@ -144,7 +150,7 @@
         }
         .total{
             background-color: rgb(157, 175, 242);
-            color: rgb(228, 84, 84);
+            color: red;
         }
         #TestBackGround{
             background-color: rgba(255, 145, 0, 0.186);
@@ -199,6 +205,9 @@
             <table id="tabprincipal">
                 <thead>
                     <tr>
+                        <th colspan="9" id="mes_atual"></th>
+                    </tr>
+                    <tr>
                         <th>Selecionar</th>
                         <th>ID</th>
                         <th>Cartão</th>
@@ -221,7 +230,7 @@
                         <td>{{ gasto.parcelas }}</td>
                         <td>R$ {{ gasto.valor }}</td>
                         <td>{{ gasto.categoria }}</td>
-                        <td>{{ gasto.data_inicial }}</td>
+                        <td id="getMes">{{ gasto.data_inicial }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -229,11 +238,13 @@
                     </tr>
                     {% endfor %}
                     <tr>
-                        <td class="total" colspan="7"><strong>Total</strong></td>
+                        <td class="saldorestante" colspan="5"></td>
+                        <td class="total" colspan="2"><strong>Total</strong></td>
                         <td class="total" colspan="2"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
                     </tr>
                     <tr>
-                        <td class="saldorestante" colspan="7"><strong><strong id="SaldoVerde">Saldo</strong> <strong id="menos">-</strong> Total<strong id="menos">:</strong> </strong></td>
+                        <td class="saldorestante" colspan="5"></td>
+                        <td class="saldorestante" colspan="2"><strong><strong id="SaldoVerde">Saldo</strong> <strong id="menos">-</strong> Total <strong id="menos">:</strong> </strong></td>
                         <td class="saldorestante" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
                     </tr>
                 </tbody>
@@ -294,6 +305,18 @@
     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+
+        atual_mes = document.getElementById("getMes").innerText
+        let mes_formatado = parseInt(atual_mes.split("/")[0], 10);
+        console.log(mes_formatado)
+        let meses = ['','Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro','Dezembro'];
+        mes_escolhido = meses[mes_formatado]
+        console.log(mes_escolhido)
+        document.getElementById("mes_atual").textContent = mes_escolhido
+    
+        
+
+
         document.getElementById("paginatualGastosMensais").removeAttribute("href");
         document.getElementById("paginatualGastosMensais").style.color = "black";
         document.getElementById("paginatualGastosMensais").style.border = "1px solid rgb(255, 255, 255)"
@@ -303,6 +326,7 @@
 
 
         let verificar_elemento = document.getElementById("verificarValor");
+        
         let valorSaldoTexto = document.getElementById("saldorestantecalculo").innerText;
         let valorSaldo = parseFloat(valorSaldoTexto.replace("R$", "").replace(",", "").trim());
 

@@ -290,7 +290,7 @@
         </form>
         
         <form id="formGastos" action="{% url 'criar_gasto' %}" method="post">
-            <h3 class="h3Info">Criar de gasto:</h3>
+            <h3 class="h3Info">Criar gasto:</h3>
             {% csrf_token %}
             <div id="backgroundForm">
                 <input class="inputformCriarGastos" type="text" name="cartao" placeholder="Cartão" required>
