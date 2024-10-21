@@ -175,7 +175,7 @@
             margin-bottom: 20px;
         }
 
-        #gasto-graph-cartao, #gasto-graph-categoria{
+        #gasto-graph-cartao, #gasto-graph-categoria, #gasto-graph-mensal{
             flex-direction: column;
             padding: 10px;
             position: relative;
@@ -291,12 +291,30 @@
             var graph_data_categoria = {{ graph_json_categoria|safe }};
         </script>
     {% endif %}
+    
+
+    {% if graph_json_mensal %}
+        <div id="gasto-graph-mensal" style="display: none;"></div>
+        <script type="text/javascript">
+            var graph_data_mensal = {{ graph_json_mensal|safe }};
+            var layout_mensal = {
+                title: { text: "Gastos e Saldos Mensais", font: { color: 'rgb(19, 75, 112)', size: 24 }},
+                xaxis: { title: "Meses" },
+                yaxis: { title: "Total em R$" },
+                paper_bgcolor: 'rgb(252, 250, 235)',
+                plot_bgcolor: 'white',
+                hovermode: 'x',
+            };
+            Plotly.newPlot('gasto-graph-mensal', graph_data_mensal.data, layout_mensal);
+        </script>
+    {% endif %}
 
     <div id="subdiv">
         <form id="formGastos">
         <select name="tipoGrafico" id="selectGrafico">
             <option value="graficoCartaoPizza">Gráfico por cartão</option>
             <option value="graficoCategoriaPizza">Gráfico por categoria</option>
+            <option value="graficoMensal">Gráfico Mensal Total</option>
         </select>
         <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
     </form>
@@ -389,12 +407,16 @@
                     var selectedGrafico = document.getElementById("selectGrafico").value;
                     document.getElementById("gasto-graph-cartao").style.display = "none";
                     document.getElementById("gasto-graph-categoria").style.display = "none";
+                    document.getElementById("gasto-graph-mensal").style.display = "none";
                     if (selectedGrafico === "graficoCartaoPizza") {
                         document.getElementById("gasto-graph-cartao").style.display = "block";
                         Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
                     } else if (selectedGrafico === "graficoCategoriaPizza") {
                         document.getElementById("gasto-graph-categoria").style.display = "block";
                         Plotly.newPlot('gasto-graph-categoria', graph_data_categoria.data, graph_data_categoria.layout);
+                    } else if (selectedGrafico === "graficoMensal") {
+                        document.getElementById("gasto-graph-mensal").style.display = "block";
+                        Plotly.newPlot('gasto-graph-mensal', graph_data_mensal.data, graph_data_mensal.layout);
                     }
                 });
                 if(!verificar_elemento){

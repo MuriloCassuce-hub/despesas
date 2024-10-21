@@ -282,6 +282,84 @@ def gastosMensais(request):
     )
     graph_json_categoria = fig_categoria.to_json()
 
+
+    #Por linhas mensais
+
+    #Gastos
+    gastos_totais_mensal = Gastos.objects.filter(usuario=request.user).values_list("data_inicial", flat=True).distinct()
+    lista1 = []
+    lista2 = []
+    for data in gastos_totais_mensal:
+        data_datetime = datetime.strptime(data, "%m/%Y")
+        gastos_do_mes = Gastos.objects.filter(usuario=request.user, data_inicial=data)
+        total_mes = sum(gasto.valor_parcelado() for gasto in gastos_do_mes)
+        lista1.append(total_mes)
+        mes_ano = data_datetime.strftime("%m/%Y")
+        lista2.append(mes_ano)
+
+    #Saldo
+    saldos_totais_mensal = EntradaDinheiro.objects.filter(usuario=request.user).values_list("DataEntradaSaldo", flat=True).distinct()
+    lista3 = []
+    lista4 = []
+
+    for data in saldos_totais_mensal:
+        data_datetime = datetime.strptime(data, "%m/%Y")
+        saldos_do_mes = EntradaDinheiro.objects.filter(usuario=request.user, DataEntradaSaldo=data)
+        total_saldo_mes = sum(entrada.valor_de_entrada for entrada in saldos_do_mes)
+        lista3.append(total_saldo_mes)
+        mes_ano = data_datetime.strftime("%m/%Y")
+        lista4.append(mes_ano)
+
+    saldos_unicos = set(lista4)
+    gastos_unicos = set(lista2)
+    for mes in saldos_unicos:
+        if mes not in gastos_unicos:
+            lista2.append(mes)
+            lista1.append(0)
+    saldos_alinhados = []
+    for mes in lista2:
+        if mes in lista4:
+            index = lista4.index(mes)
+            saldos_alinhados.append(lista3[index])
+        else:
+            saldos_alinhados.append(0)
+
+    fig_mensal = go.Figure()
+    fig_mensal.add_trace(go.Scatter(
+        x=lista2,  
+        y=lista1,  
+        mode='lines+markers',
+        name='Gastos Mensais',
+        line=dict(color='firebrick', width=2),
+        marker=dict(size=8, symbol='circle', color='firebrick'),
+        hovertemplate="Mês: %{x}<br>Total de Gastos: R$ %{y:,.2f}<extra></extra>",
+    ))
+    fig_mensal.add_trace(go.Scatter(
+        x=lista2,  
+        y=saldos_alinhados,  
+        mode='lines+markers',
+        name='Saldos Mensais',
+        line=dict(color='green', width=2),
+        marker=dict(size=8, symbol='circle', color='green'),
+        hovertemplate="Mês: %{x}<br>Total de Saldos: R$ %{y:,.2f}<extra></extra>",
+    ))
+    fig_mensal.update_layout(
+        title={'text': "Gastos e Saldos Mensais", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
+        xaxis_title="Meses",
+        yaxis_title="Total em R$",
+        width=800,
+        height=400,
+        paper_bgcolor='rgb(252, 250, 235)',
+        plot_bgcolor='white',
+        hovermode='x',
+        xaxis=dict(
+            tickmode='array',
+            tickvals=lista2,  
+            ticktext=lista2,  
+        ),
+    )
+    graph_json_mensal = fig_mensal.to_json()
+
     return render(request, "usuarios/gastosMensais.html", {
         "gastos": gastos_filtrados,
         "datas_disponiveis": datas_disponiveis_ordenadas,
@@ -289,6 +367,7 @@ def gastosMensais(request):
         "total_saldo": total_saldo,
         "graph_json_cartao": graph_json_cartao,
         "graph_json_categoria": graph_json_categoria,
+        "graph_json_mensal": graph_json_mensal,
     })
 
 def AdicionarSaldo(request):
@@ -349,13 +428,13 @@ def AdicionarSaldo(request):
         consultar_data = request.POST.get("data_inicial_formatada")
         if consultar_data:
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
+            total_entrada = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
         else:
             consultar_data = agora_formatado
     return render(request, "usuarios/AdicionarSaldo.html", {
         "entradadinheiro": datas_filtradas,
         "datas_disponiveis": datas_disponiveis_ordenadas,
         "total_entrada": total_entrada,
-
     })
 
 def register(request):
