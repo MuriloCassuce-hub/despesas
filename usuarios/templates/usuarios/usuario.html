@@ -12,6 +12,7 @@
                 <li style="color: black; border: 1px solid rgb(255, 255, 255); padding: 4px; border-radius: 5px; background-color: white;"><a href="{% url 'criar_gasto' %}"></a>Criar Gastos</li>
                 <li><a id="paginatualGastosIndividuais" href="{% url 'gastosIndividuais' %}">Gastos por cartões</a></li>
                 <li><a id="paginatualGastosMensais" href="{% url 'gastosMensais' %}">Gastos Mensais</a></li>
+                <li><a id="paginatualImportarGastos" href="{% url 'ImportarGastos' %}">Importar Gastos</a></li>
                 <li><a id="Logout"href="{% url 'logout' %}">Log out</a></li>
                 
             </ul>
@@ -253,11 +254,10 @@
             <table id="tabprincipal">
                 <thead>
                     <tr>
-                        <td id="NomeTabela" colspan="9"><strong>Histórico</strong></td>
+                        <td id="NomeTabela" colspan="8"><strong>Histórico</strong></td>
                     </tr>
                     <tr>
                         <th>Selecionar</th>
-                        <th>ID</th>
                         <th>Cartão</th>
                         <th>Item</th>
                         <th>Valor Parcelado</th>
@@ -271,7 +271,6 @@
                     {% for gasto in gastos|slice:"::-1" %}
                     <tr id="tr_criar_gasto" class="gasto-item">
                         <td><input id="deleteCheck" type="checkbox" name="deletar" value="{{ gasto.id }}"></td>
-                        <td id="testeID">{{ gasto.id }}</td>
                         <td>{{ gasto.cartao }}</td>
                         <td>{{ gasto.item }}</td>
                         <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
@@ -282,7 +281,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9">Nenhum gasto encontrado.</td>
+                        <td colspan="8">Nenhum gasto encontrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -35,12 +35,9 @@ class Gastos(models.Model):
             return valor_parcelado
         return 0.00
     
-    def total_gastos(self):
-        total_de_gastos = Gastos.objects.filter(usuario = self.usuario, data_inicial = self.data_inicial).aggregate(sum('valor_parcelado'))
-        return total_de_gastos['valor_parcelado__sum']
     
     def __str__(self):
-        return f"{self.usuario.username} {self.total_gastos} {self.cartao} {self.item} {self.categoria} {self.valor} {self.parcelas} {self.parcelado} {self.valor_parcelado():.2f} {self.data_inicial}"
+        return f"{self.usuario.username} {self.cartao} {self.item} {self.categoria} {self.valor} {self.parcelas} {self.parcelado} {self.valor_parcelado():.2f} {self.data_inicial}"
 
 class EntradaDinheiro(models.Model):
     origem = models.CharField(max_length=70)
@@ -59,6 +56,6 @@ class EntradaDinheiro(models.Model):
 class User(AbstractUser):
     nome = models.CharField(max_length=100)
     data_cadastro = models.DateTimeField(auto_now_add=True)
-
+    
     def __str__(self):
         return self.username  

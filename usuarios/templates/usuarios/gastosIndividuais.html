@@ -189,7 +189,6 @@
             <thead>
                 <tr>
                     <th>Selecionar</th>
-                    <th>ID</th>
                     <th>Cartão</th>
                     <th>Item</th>
                     <th>Valor Parcelado</th>
@@ -203,7 +202,6 @@
                 {% for gasto in gastos|slice:"::-1" %}
                 <tr id="tr_criar_gasto" class="gasto-item">
                     <td><input type="checkbox" name="deletar" value="{{ gasto.id }}"></td>
-                    <td>{{ gasto.id }}</td>
                     <td>{{ gasto.cartao }}</td>
                     <td>{{ gasto.item }}</td>
                     <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
@@ -214,11 +212,11 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9">Nenhum cartão encontrado.</td>
+                    <td colspan="8">Nenhum cartão encontrado.</td>
                 </tr>
                 {% endfor %}
                 <tr>
-                    <td class="total" colspan="8"><strong>Total</strong></td>
+                    <td class="total" colspan="7"><strong>Total</strong></td>
                     <td class="total" colspan="1"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
                 </tr>
             </tbody>

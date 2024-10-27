@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from .models import Gastos, EntradaDinheiro
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +9,7 @@ from collections import defaultdict
 from decimal import Decimal
 from datetime import datetime
 from .corrigir_meses import suprir_meses, corrigir_linha_temporal
+import pandas as pd
 
 
 #Verificação index
@@ -44,6 +45,80 @@ def logout_view(request):
         "mensagem": "Logout realizado com sucesso!"
     })
 
+#Importar Gastos por planilha
+def ImportarGastos(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+    
+    CATEGORIA_GASTO = [
+        ("Alimentação", "Alimentação"),
+        ("Transporte", "Transporte"),
+        ("Entretenimento", "Entretenimento"),
+        ("Moradia", "Moradia"),
+        ("Lazer", "Lazer"),
+        ("Educação", "Educação"),
+        ("Serviços", "Serviços"),
+        ("Saúde", "Saúde"),
+        ("Outros", "Outros"),
+    ]
+    
+    mensagem = ""
+
+    if request.method == "POST" and "ImportarGasto" in request.POST:
+        arquivo = request.FILES.get('arquivoXLSX')
+        if not arquivo:
+            mensagem = "Nenhum arquivo selecionado."
+            return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+
+        try:
+            df = pd.read_excel(arquivo)
+            for i, row in df.iterrows():
+                if all(pd.notnull([row['cartao'], row['item'], row['valor'], row['parcelas'], row['categoria'], row['data_primeira_parcela']])):
+                    cartao = row['cartao'].capitalize()
+                    item = row['item'].capitalize()
+                    valor = row['valor']
+                    parcelas = int(row['parcelas'])
+                    categoria = row['categoria'].capitalize()
+                    data_primeira_parcela = str(row['data_primeira_parcela'])
+        
+                    categorias_permitidas = [c[0] for c in CATEGORIA_GASTO]
+                    if categoria not in categorias_permitidas:
+                        mensagem = f"Erro: Categoria '{categoria}' não é válida. Certifique-se que está seguindo o modelo padrão."
+                        return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+
+                    try:
+                        data_inicial = datetime.strptime(data_primeira_parcela, "%m/%Y")
+                    except ValueError:
+                        mensagem = f"Erro: Formato de data inválido em {data_primeira_parcela}. Certifique-se que está seguindo o modelo padrão."
+                        return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+
+                    copia_mes = data_inicial.month
+                    copia_ano = data_inicial.year
+
+                    for i in range(1, parcelas + 1):
+                        parcela_atual = f"{i}/{parcelas}"
+                        if i == 1:
+                            data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
+                        else:
+                            copia_mes += 1
+                            if copia_mes > 12:
+                                copia_mes = 1
+                                copia_ano += 1
+                            data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
+
+                        p = Gastos.objects.create(
+                            cartao=cartao, categoria=categoria, item=item, valor=valor,
+                            parcelas=parcela_atual, parcelado=parcelas, 
+                            data_inicial=data_inicial_formatada, usuario=request.user
+                        )
+            mensagem = 'Arquivo importado com sucesso!'
+
+        except Exception as e:
+            mensagem = f"Erro ao ler o arquivo XLSX: {e}. Certifique-se que está seguindo o modelo padrão."
+    return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+
+
+                
 #Pagina de criação de gastos
 def criar_gasto(request):
 
@@ -221,6 +296,7 @@ def gastosMensais(request):
             total_entrada = 0
             total_saldo = 0
             existencia = 0
+            total_receita = 0
 
     else:
         verifica = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
@@ -228,6 +304,7 @@ def gastosMensais(request):
             total_entrada = 0
             total_saldo = 0
             existencia = 0
+            total_receita = 0
         elif agora_formatado not in verifica:
             primeira_data = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
             consultar_data = primeira_data[0]

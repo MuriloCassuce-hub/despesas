@@ -211,11 +211,10 @@
             <table id="tabprincipal">
                 <thead>
                     <tr>
-                        <th colspan="9" id="mes_atual"></th>
+                        <th colspan="8" id="mes_atual"></th>
                     </tr>
                     <tr>
                         <th>Selecionar</th>
-                        <th>ID</th>
                         <th>Cartão</th>
                         <th>Item</th>
                         <th>Valor Parcelado</th>
@@ -229,32 +228,31 @@
                     {% for gasto in gastos|slice:"::-1" %}
                     <tr id="tr_criar_gasto" class="gasto-item">
                         <td><input type="checkbox" name="deletar" value="{{ gasto.id }}"></td>
-                        <td id="verificarValor">{{ gasto.id }}</td>
                         <td>{{ gasto.cartao }}</td>
                         <td>{{ gasto.item }}</td>
                         <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
                         <td>{{ gasto.parcelas }}</td>
-                        <td>R$ {{ gasto.valor }}</td>
+                        <td id="verificarValor">R$ {{ gasto.valor }}</td>
                         <td>{{ gasto.categoria }}</td>
                         <td id="getMes">{{ gasto.data_inicial }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9">Nenhum gasto encontrado.</td>
+                        <td colspan="8">Nenhum gasto encontrado.</td>
                     </tr>
                     {% endfor %}
                     <tr>
-                        <td class="saldorestante" colspan="5"></td>
+                        <td class="saldorestante" colspan="4"></td>
                         <td class="total" colspan="2"><strong>Gastos</strong></td>
                         <td class="total" colspan="2"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
                     </tr>
                     <tr>
-                        <td class="ReceitaVerde" colspan="5"></td>
+                        <td class="ReceitaVerde" colspan="4"></td>
                         <td class="ReceitaVerde" colspan="2"><strong><strong id="ReceitaVerde">Receita</strong></td>
                         <td class="ReceitaVerde" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_receita|floatformat:2 }}</strong></td>
                     </tr>
                     <tr>
-                        <td class="SaldoVerde" colspan="5"></td>
+                        <td class="SaldoVerde" colspan="4"></td>
                         <td class="SaldoVerde" colspan="2"><strong><strong id="SaldoVerde">Saldo</strong></td>
                         <td class="SaldoVerde" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
                     </tr>
@@ -284,6 +282,7 @@
                 <span id="pageInfo2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag2">Próximo</button>
             </div>
+            <p>ooooi</p>
         </div>
     </div>
     <h1 id="h1Despesas" >Visualização de dados</h1>
@@ -352,7 +351,7 @@
         }
         
 
-        ///paginacao
+        ///paginacao atual
         document.getElementById("paginatualGastosMensais").removeAttribute("href");
         document.getElementById("paginatualGastosMensais").style.color = "black";
         document.getElementById("paginatualGastosMensais").style.border = "1px solid rgb(255, 255, 255)"
@@ -451,7 +450,9 @@
                 Plotly.newPlot('gasto-graph-cartao', graph_data_cartao.data, graph_data_cartao.layout);
                 }
             }
-        });
+        })
+
+        //// formatar o codigo para ficar limpo
 </script>
 
 {% endblock %}

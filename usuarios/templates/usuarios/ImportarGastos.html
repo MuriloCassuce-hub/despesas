@@ -1,0 +1,96 @@
+{% extends "usuarios/layout.html" %}
+
+{% load static %}
+
+{% block body %}
+
+    {% csrf_token %}
+<style>
+    #h1Despesas{
+        text-align: center;
+        color: rgb(238, 238, 238);
+        font-size: 40px;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+    #divPrincipal{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(19, 75, 112);
+        border-radius: 15px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        height: 600px;
+        overflow: auto;
+        box-shadow: 0 15px 25px rgba(14, 25, 27, 0.507);
+        margin-bottom: 20px;
+        flex-direction: column;
+    }
+
+    #divFormEMensagem{
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    button{
+            background-color: rgb(47, 0, 255);
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            color: white;
+        }
+
+    input{
+        width: 100%;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    h2{
+        color: whitesmoke;
+    }
+
+    #LabelBaixarPlanilha:hover{
+        background-color: rgba(255, 0, 0, 0.192);
+        border-radius: 10px;
+        padding: 5px;
+    }
+</style>
+
+<h1 id="h1Despesas">Importar Gastos</h1>
+    <div id="divPrincipal">
+        <h2>Importar arquivo xlsx</h2>
+        <div id="divFormEMensagem">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="fileInput">Escolha um arquivo XLSX:</label>
+                <input type="file" id="fileInput" name="arquivoXLSX" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                <button name="ImportarGasto" type="submit">Enviar</button>
+            </form>
+            <div id="DivMensagem">
+                {% if mensagem %}
+                <p><strong>Status da última importação:</strong> {{ mensagem }}</p>
+                {% endif %}
+                <label><u>Modelo para download</u>: </label>
+                <a id="LabelBaixarPlanilha" href="https://docs.google.com/spreadsheets/d/1-2bTK_6vRBSVzCMmxkAgpabe3WEx6FyRLdeT4TisxrM/export?format=xlsx" class="button" download><strong>Baixar Arquivo Modelo.xlsx</strong></a>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.getElementById("paginatualImportarGastos").removeAttribute("href");
+        document.getElementById("paginatualImportarGastos").style.color = "black";
+        document.getElementById("paginatualImportarGastos").style.border = "1px solid rgb(255, 255, 255)"
+        document.getElementById("paginatualImportarGastos").style.padding = "4px";
+        document.getElementById("paginatualImportarGastos").style.borderRadius = "5px"
+        document.getElementById("paginatualImportarGastos").style.backgroundColor = "white";  
+    })
+</script>
+{% endblock %}
