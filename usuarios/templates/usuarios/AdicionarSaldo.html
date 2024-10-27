@@ -61,6 +61,7 @@
         flex-direction: column;
         align-items: center;
         margin-left: 20px;
+        margin-right: 10px;
         padding-top: 5px;
     }
 
@@ -112,8 +113,23 @@
     
 </style>
 
-<h1 id="h1Despesas">Saldos</h1>
+<h1 id="h1Despesas">Receitas</h1>
     <div id="divPrincipal">
+        <div id="formGastos2">
+            <h3 class="h3Info">Filtrar pela data:</h3>
+
+            <form id="FORMbackground" method="post">
+                {% csrf_token %}
+                <label for="data_inicial_formatada">Selecione uma data:</label>
+                <select name="data_inicial_formatada" id="data_inicial_formatada">
+                    <option>Selecione uma data</option>
+                    {% for data in datas_disponiveis %}
+                        <option value="{{ data }}">{{ data }}</option>
+                    {% endfor %}
+                </select>
+                <button id="buttonConsultar" name="consultaMensal" type="submit">Consultar</button>
+            </form>
+        </div>
         <form method="POST" id="formTabela" action="{% url 'AdicionarSaldo' %}">
             {% csrf_token %}
                 <input type="hidden" name="deletar_selecionados" id="idsParaDeletar" value="">
@@ -148,31 +164,19 @@
         </div>
 
         <div id="formGastos2">
-            <h3 class="h3Info">Adicionar saldo:</h3>
+            <h3 class="h3Info">Adicionar receita:</h3>
 
             <form id="TestBackGround" method="post">
                 {% csrf_token %}
-                <input class="inputformAdicionarSaldo" type="text" name="Origem" placeholder="Digite a origem do valor" required>
-                <input class="inputformAdicionarSaldo" type="number" name="saldo" value="AdicionarSaldo" placeholder="Adicione o saldo de entrada" required  max="1000000" step="0.01">
+                <input class="inputformAdicionarSaldo" type="text" name="Origem" placeholder="Digite a origem da receita" required>
+                <input class="inputformAdicionarSaldo" type="number" name="saldo" value="AdicionarSaldo" placeholder="Adicione o valor da receita" required  max="1000000" step="0.01">
                 <label>Selecione uma data:</label>
                 <input class="inputformAdicionarSaldo" type="month" name="DataEntradaSaldo" placeholder="Adicione a data de entrada do saldo" required>
-                <button id="adicionarSaldo" type="submit" name="AdicionarSaldo">Adicionar saldo</button>
+                <button id="adicionarSaldo" type="submit" name="AdicionarSaldo">Adicionar receita</button>
                 <button type="submit" id="deletarDados">Deletar</button>
             </form>
             
-            <h3 class="h3Info">Filtrar pela data:</h3>
 
-            <form id="FORMbackground" method="post">
-                {% csrf_token %}
-                <label for="data_inicial_formatada">Selecione uma data:</label>
-                <select name="data_inicial_formatada" id="data_inicial_formatada">
-                    <option>Selecione uma data</option>
-                    {% for data in datas_disponiveis %}
-                        <option value="{{ data }}">{{ data }}</option>
-                    {% endfor %}
-                </select>
-                <button id="buttonConsultar" name="consultaMensal" type="submit">Consultar</button>
-            </form>
         </div>
     </div>
 

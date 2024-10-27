@@ -163,8 +163,14 @@
             color: rgb(255, 0, 0);
         }
 
-        #SaldoVerde{
+        #ReceitaVerde, .ReceitaVerde{
             color: green;
+            background-color: rgb(157, 175, 242);
+        }
+
+        #SaldoVerde, .SaldoVerde{
+            color: blue;
+            background-color: rgb(157, 175, 242);
         }
 
         #menos{
@@ -239,13 +245,18 @@
                     {% endfor %}
                     <tr>
                         <td class="saldorestante" colspan="5"></td>
-                        <td class="total" colspan="2"><strong>Total</strong></td>
+                        <td class="total" colspan="2"><strong>Gastos</strong></td>
                         <td class="total" colspan="2"><strong>R$ {{ total_entrada|floatformat:2 }}</strong></td>
                     </tr>
                     <tr>
-                        <td class="saldorestante" colspan="5"></td>
-                        <td class="saldorestante" colspan="2"><strong><strong id="SaldoVerde">Saldo</strong> <strong id="menos">-</strong> Total <strong id="menos">:</strong> </strong></td>
-                        <td class="saldorestante" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
+                        <td class="ReceitaVerde" colspan="5"></td>
+                        <td class="ReceitaVerde" colspan="2"><strong><strong id="ReceitaVerde">Receita</strong></td>
+                        <td class="ReceitaVerde" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_receita|floatformat:2 }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="SaldoVerde" colspan="5"></td>
+                        <td class="SaldoVerde" colspan="2"><strong><strong id="SaldoVerde">Saldo</strong></td>
+                        <td class="SaldoVerde" id="saldorestantecalculo" colspan="7"><strong>R$ {{ total_saldo|floatformat:2 }}</strong></td>
                     </tr>
                 </tbody>
             </table>
@@ -261,7 +272,7 @@
                     {% for data in datas_disponiveis %}
                         <option value="{{ data }}">{{ data }}</option>
                     {% empty %}
-                        <option value="">Nenhuma data encontrada</option>
+                        <option id="VerificarExistencia" value="">Nenhuma data encontrada</option>
                     {% endfor %}
                 </select>
                 <button id="buttonConsultar" name="consultaMensal" type="submit">Consultar</button>
@@ -283,58 +294,65 @@
         <script id="scriptPizzaCartao" type="text/javascript">
             var graph_data_cartao = {{ graph_json_cartao|safe }};
         </script>
-    {% endif %}
+        {% endif %}
 
-    {% if graph_json_categoria %}
-        <div id="gasto-graph-categoria" style="display: none;"></div>
-        <script type="text/javascript">
-            var graph_data_categoria = {{ graph_json_categoria|safe }};
-        </script>
-    {% endif %}
-    
+        {% if graph_json_categoria %}
+            <div id="gasto-graph-categoria" style="display: none;"></div>
+            <script type="text/javascript">
+                var graph_data_categoria = {{ graph_json_categoria|safe }};
+            </script>
+        {% endif %}
+        
 
-    {% if graph_json_mensal %}
-        <div id="gasto-graph-mensal" style="display: none;"></div>
-        <script type="text/javascript">
-            var graph_data_mensal = {{ graph_json_mensal|safe }};
-            var layout_mensal = {
-                title: { text: "Gastos e Saldos Mensais", font: { color: 'rgb(19, 75, 112)', size: 24 }},
-                xaxis: { title: "Meses" },
-                yaxis: { title: "Total em R$" },
-                paper_bgcolor: 'rgb(252, 250, 235)',
-                plot_bgcolor: 'white',
-                hovermode: 'x',
-            };
-            Plotly.newPlot('gasto-graph-mensal', graph_data_mensal.data, layout_mensal);
-        </script>
-    {% endif %}
+        {% if graph_json_mensal %}
+            <div id="gasto-graph-mensal" style="display: none;"></div>
+            <script type="text/javascript">
+                var graph_data_mensal = {{ graph_json_mensal|safe }};
+                Plotly.newPlot('gasto-graph-mensal', graph_data_mensal.data);
+            </script>
+        {% endif %}
 
-    <div id="subdiv">
-        <form id="formGastos">
-        <select name="tipoGrafico" id="selectGrafico">
-            <option value="graficoCartaoPizza">Gráfico por cartão</option>
-            <option value="graficoCategoriaPizza">Gráfico por categoria</option>
-            <option value="graficoMensal">Gráfico Mensal Total</option>
-        </select>
-        <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
-    </form>
-    </div>
+        <div id="subdiv">
+            <form id="formGastos">
+                <select name="tipoGrafico" id="selectGrafico">
+                    <option value="graficoCartaoPizza">Gráfico por cartão</option>
+                    <option value="graficoCategoriaPizza">Gráfico por categoria</option>
+                    <option value="graficoMensal">Gráfico Mensal Total</option>
+                </select>
+                <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
+            </form>
+        </div>
     </div>
     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
 
-        atual_mes = document.getElementById("getMes").innerText
+
+        document.getElementById("data_inicial_formatada").addEventListener("change", function() {
+        const valorSelecionado = this.value;
+        const botaoConsultar = document.getElementById("buttonConsultar");
+            if (valorSelecionado === "") {
+                botaoConsultar.disabled = true;
+            } else {
+                botaoConsultar.disabled = false;
+            }
+        });
+        document.getElementById("buttonConsultar").disabled = true;
+
+        ///meses
+        let verificar_existencia = {{ existencia }};
+        if(verificar_existencia >=1){
+        atual_mes = document.getElementById("getMes").innerText;
         let mes_formatado = parseInt(atual_mes.split("/")[0], 10);
-        console.log(mes_formatado)
         let meses = ['','Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro','Dezembro'];
         mes_escolhido = meses[mes_formatado]
-        console.log(mes_escolhido)
         document.getElementById("mes_atual").textContent = mes_escolhido
-    
+        }else{
+            document.getElementById("mes_atual").textContent = "Nenhuma data disponível"
+        }
         
 
-
+        ///paginacao
         document.getElementById("paginatualGastosMensais").removeAttribute("href");
         document.getElementById("paginatualGastosMensais").style.color = "black";
         document.getElementById("paginatualGastosMensais").style.border = "1px solid rgb(255, 255, 255)"
@@ -342,16 +360,16 @@
         document.getElementById("paginatualGastosMensais").style.borderRadius = "5px"
         document.getElementById("paginatualGastosMensais").style.backgroundColor = "white";
 
-
+        ///Mudar saldo conforme valor
         let verificar_elemento = document.getElementById("verificarValor");
-        
-        let valorSaldoTexto = document.getElementById("saldorestantecalculo").innerText;
-        let valorSaldo = parseFloat(valorSaldoTexto.replace("R$", "").replace(",", "").trim());
+        let valorSaldo = {{ total_saldo }};
+        console.log(valorSaldo)
 
-        if (valorSaldo > 0) {
-            document.getElementById("saldorestantecalculo").style.color = 'green';
+        if (valorSaldo => 0) {
+            document.getElementById("ReceitaVerde").style.color = 'green';
         } else {
-            document.getElementById("saldorestantecalculo").style.color = 'red';
+            console.log('falso')
+            document.getElementById("ReceitaVerde").style.color = 'red';
         }
         
         document.getElementById("Logout").addEventListener("click", function(event){

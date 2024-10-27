@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from collections import defaultdict
 from decimal import Decimal
 from datetime import datetime
+from .corrigir_meses import suprir_meses, corrigir_linha_temporal
 
 
 #Verificação index
@@ -206,25 +207,33 @@ def gastosMensais(request):
         consultar_data = request.POST.get("data_inicial_formatada")
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
+            existencia = 1
+            total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
 
         if gastos_filtrados.exists():
                 total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
                 datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
                 total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
                 total_saldo = total_saldo - total_entrada
+                existencia = 1
+                total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
         else:
             total_entrada = 0
             total_saldo = 0
+            existencia = 0
 
     else:
         verifica = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
         if not gastos_filtrados.exists():
             total_entrada = 0
             total_saldo = 0
+            existencia = 0
         elif agora_formatado not in verifica:
             primeira_data = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
             consultar_data = primeira_data[0]
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
+            existencia = 1
+            total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
     
             total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
@@ -234,6 +243,8 @@ def gastosMensais(request):
             total_entrada = sum(gasto.valor_parcelado() for gasto in gastos_filtrados)
             datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=agora_formatado, usuario=request.user)
             total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada
+            total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
+            existencia = 1
 
 
 
@@ -284,80 +295,127 @@ def gastosMensais(request):
 
 
     #Por linhas mensais
-
+    
+    filtrar_anos = Gastos.objects.filter(usuario=request.user).values_list("data_inicial", flat=True).distinct()
+    anos_distintos = sorted(list({data.split("/")[1] for data in filtrar_anos}))
     #Gastos
     gastos_totais_mensal = Gastos.objects.filter(usuario=request.user).values_list("data_inicial", flat=True).distinct()
-    lista1 = []
-    lista2 = []
+    tratando = list(gastos_totais_mensal)
+    gastos_totais_mensal = sorted(tratando, key=lambda x: datetime.strptime(x, "%m/%Y"))
+    lista_valor_gastos = []
+    lista_data_gastos = []
     for data in gastos_totais_mensal:
         data_datetime = datetime.strptime(data, "%m/%Y")
         gastos_do_mes = Gastos.objects.filter(usuario=request.user, data_inicial=data)
         total_mes = sum(gasto.valor_parcelado() for gasto in gastos_do_mes)
-        lista1.append(total_mes)
+        lista_valor_gastos.append(total_mes)
         mes_ano = data_datetime.strftime("%m/%Y")
-        lista2.append(mes_ano)
-
-    #Saldo
+        lista_data_gastos.append(mes_ano)
+    
+    nova_lista_datas = suprir_meses(lista_data_gastos)
+    lista_data_gastos, lista_valor_gastos = corrigir_linha_temporal(nova_lista_datas, lista_data_gastos, lista_valor_gastos)
+    
+    #Receita
     saldos_totais_mensal = EntradaDinheiro.objects.filter(usuario=request.user).values_list("DataEntradaSaldo", flat=True).distinct()
-    lista3 = []
-    lista4 = []
+    lista_valor_receita = []
+    lista_meses_receita = []
 
     for data in saldos_totais_mensal:
         data_datetime = datetime.strptime(data, "%m/%Y")
         saldos_do_mes = EntradaDinheiro.objects.filter(usuario=request.user, DataEntradaSaldo=data)
         total_saldo_mes = sum(entrada.valor_de_entrada for entrada in saldos_do_mes)
-        lista3.append(total_saldo_mes)
+        lista_valor_receita.append(total_saldo_mes)
         mes_ano = data_datetime.strftime("%m/%Y")
-        lista4.append(mes_ano)
+        lista_meses_receita.append(mes_ano)
 
-    saldos_unicos = set(lista4)
-    gastos_unicos = set(lista2)
+    nova_lista_datas_receita = suprir_meses(lista_meses_receita)
+    lista_meses_receita, lista_valor_receita = corrigir_linha_temporal(nova_lista_datas_receita, lista_meses_receita, lista_valor_receita)
+    
+    saldos_unicos = set(lista_meses_receita)
+    gastos_unicos = set(lista_data_gastos)
     for mes in saldos_unicos:
         if mes not in gastos_unicos:
-            lista2.append(mes)
-            lista1.append(0)
+            lista_data_gastos.append(mes)
+            lista_data_gastos = sorted(lista_data_gastos, key=lambda x: datetime.strptime(x, "%m/%Y"))
+            pos = lista_data_gastos.index(mes)
+            lista_valor_gastos.insert(pos, 0)
     saldos_alinhados = []
-    for mes in lista2:
-        if mes in lista4:
-            index = lista4.index(mes)
-            saldos_alinhados.append(lista3[index])
+    for mes in lista_data_gastos:
+        if mes in lista_meses_receita:
+            index = lista_meses_receita.index(mes)
+            saldos_alinhados.append(lista_valor_receita[index])
         else:
             saldos_alinhados.append(0)
 
+    cores_saldos = []
+    saldo = []
+    for i in range(len(saldos_alinhados)):
+        diferenca = saldos_alinhados[i] - lista_valor_gastos[i]
+        saldo.append(diferenca)
+        if diferenca < 0:
+            cores_saldos.append('red')
+        else:
+            cores_saldos.append('green')
+
     fig_mensal = go.Figure()
     fig_mensal.add_trace(go.Scatter(
-        x=lista2,  
-        y=lista1,  
+        x=lista_data_gastos,
+        y=saldo,
+        mode="lines+markers",
+        name="Saldo Mensal",
+        line=dict(color='blue', width=2),
+        marker=dict(size=8, symbol='square', color='blue'),
+        hovertemplate="Mês: %{x}<br> Saldo total: R$ %{y:,.2f}<extra></extra>"
+    ))
+    fig_mensal.add_trace(go.Scatter(
+        x=lista_data_gastos,  
+        y=lista_valor_gastos,  
         mode='lines+markers',
-        name='Gastos Mensais',
+        name='Gasto Mensal',
         line=dict(color='firebrick', width=2),
         marker=dict(size=8, symbol='circle', color='firebrick'),
         hovertemplate="Mês: %{x}<br>Total de Gastos: R$ %{y:,.2f}<extra></extra>",
     ))
     fig_mensal.add_trace(go.Scatter(
-        x=lista2,  
+        x=lista_data_gastos,  
         y=saldos_alinhados,  
         mode='lines+markers',
-        name='Saldos Mensais',
+        name='Receita Mensal',
         line=dict(color='green', width=2),
         marker=dict(size=8, symbol='circle', color='green'),
-        hovertemplate="Mês: %{x}<br>Total de Saldos: R$ %{y:,.2f}<extra></extra>",
+        hovertemplate="Mês: %{x}<br>Receita total: R$ %{y:,.2f}<extra></extra>",
     ))
-    fig_mensal.update_layout(
-        title={'text': "Gastos e Saldos Mensais", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
-        xaxis_title="Meses",
-        yaxis_title="Total em R$",
-        width=800,
-        height=400,
-        paper_bgcolor='rgb(252, 250, 235)',
-        plot_bgcolor='white',
-        hovermode='x',
-        xaxis=dict(
-            tickmode='array',
-            tickvals=lista2,  
-            ticktext=lista2,  
-        ),
-    )
+    if existencia == 1:
+        fig_mensal.update_layout(
+            title={'text': "Gastos e Receitas Mensais", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
+            yaxis_title="Total em R$",
+            width=900,
+            height=500,
+            paper_bgcolor='rgb(252, 250, 235)',
+            plot_bgcolor='rgb(252, 250, 235)',
+            hovermode='x',
+            xaxis=dict(
+                tickmode='array',
+                tickvals=lista_data_gastos,  
+                ticktext=lista_data_gastos,  
+            ),
+            shapes=[{'type': 'line', 'x0': min(lista_data_gastos), 'y0': 0, 'x1': max(lista_data_gastos), 'y1': 0, 'line': {'color': 'black', 'width': 2, 'dash': 'solid'}}],
+        )
+    else:
+        fig_mensal.update_layout(
+            title={'text': "Gastos e Receitas Mensais", 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'rgb(19, 75, 112)', 'size':24}},
+            yaxis_title="Total em R$",
+            width=900,
+            height=500,
+            paper_bgcolor='rgb(252, 250, 235)',
+            plot_bgcolor='rgb(252, 250, 235)',
+            hovermode='x',
+            xaxis=dict(
+                tickmode='array',
+                tickvals=lista_data_gastos,  
+                ticktext=lista_data_gastos,  
+            ),
+        )
     graph_json_mensal = fig_mensal.to_json()
 
     return render(request, "usuarios/gastosMensais.html", {
@@ -368,6 +426,9 @@ def gastosMensais(request):
         "graph_json_cartao": graph_json_cartao,
         "graph_json_categoria": graph_json_categoria,
         "graph_json_mensal": graph_json_mensal,
+        "anos_distintos": anos_distintos,
+        "existencia": existencia,
+        "total_receita": total_receita,
     })
 
 def AdicionarSaldo(request):
@@ -421,7 +482,7 @@ def AdicionarSaldo(request):
     else:
         datas_filtradas = EntradaDinheiro.objects.none()
         total_entrada = 0
-
+    
 
     
     if request.method == "POST" and 'consultaMensal' in request.POST:
