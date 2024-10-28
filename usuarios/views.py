@@ -10,6 +10,7 @@ from decimal import Decimal
 from datetime import datetime
 from .corrigir_meses import suprir_meses, corrigir_linha_temporal
 import pandas as pd
+import json
 
 
 #Verificação index
@@ -17,6 +18,14 @@ def index(request):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     return HttpResponseRedirect(reverse("gastosMensais"))
 
@@ -50,6 +59,14 @@ def ImportarGastos(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
+    
     CATEGORIA_GASTO = [
         ("Alimentação", "Alimentação"),
         ("Transporte", "Transporte"),
@@ -72,45 +89,67 @@ def ImportarGastos(request):
 
         try:
             df = pd.read_excel(arquivo)
-            for i, row in df.iterrows():
-                if all(pd.notnull([row['cartao'], row['item'], row['valor'], row['parcelas'], row['categoria'], row['data_primeira_parcela']])):
-                    cartao = row['cartao'].capitalize()
-                    item = row['item'].capitalize()
-                    valor = row['valor']
-                    parcelas = int(row['parcelas'])
-                    categoria = row['categoria'].capitalize()
-                    data_primeira_parcela = str(row['data_primeira_parcela'])
-        
-                    categorias_permitidas = [c[0] for c in CATEGORIA_GASTO]
-                    if categoria not in categorias_permitidas:
-                        mensagem = f"Erro: Categoria '{categoria}' não é válida. Certifique-se que está seguindo o modelo padrão."
-                        return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+            df_sem_vazios = df.dropna(subset=['cartao', 'item', 'valor', 'parcelas', 'categoria', 'data_primeira_parcela'])
+            num_linhas_sem_vazios = df_sem_vazios.shape[0]
+            if num_linhas_sem_vazios > 50:
+                mensagem = "Quantidade de dados não permitida para teste. Caso deseje adicionar mais que 50 dados, me contate no linkedin."
+                return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+            
+            if num_linhas_sem_vazios > 10:
+                max_parcelas = 20
+            else: 
+                max_parcelas = 50
 
-                    try:
-                        data_inicial = datetime.strptime(data_primeira_parcela, "%m/%Y")
-                    except ValueError:
-                        mensagem = f"Erro: Formato de data inválido em {data_primeira_parcela}. Certifique-se que está seguindo o modelo padrão."
-                        return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+            if (df_sem_vazios['parcelas'] > max_parcelas).any():
+                mensagem = f"Erro: O campo 'parcelas' contém valores superiores a {max_parcelas} para o número de linhas importadas. Verifique e tente novamente."
+                return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
 
-                    copia_mes = data_inicial.month
-                    copia_ano = data_inicial.year
 
-                    for i in range(1, parcelas + 1):
-                        parcela_atual = f"{i}/{parcelas}"
-                        if i == 1:
-                            data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
-                        else:
-                            copia_mes += 1
-                            if copia_mes > 12:
-                                copia_mes = 1
-                                copia_ano += 1
-                            data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
+            else:
+                total_registros = 0
+                for i, row in df.iterrows():
+                    if all(pd.notnull([row['cartao'], row['item'], row['valor'], row['parcelas'], row['categoria'], row['data_primeira_parcela']])):
+                        cartao = row['cartao'].capitalize()
+                        item = row['item'].capitalize()
+                        valor = row['valor']
+                        parcelas = int(row['parcelas'])
+                        categoria = row['categoria'].capitalize()
+                        data_primeira_parcela = str(row['data_primeira_parcela'])
+            
+                        categorias_permitidas = [c[0] for c in CATEGORIA_GASTO]
+                        if categoria not in categorias_permitidas:
+                            mensagem = f"Erro: Categoria '{categoria}' não é válida. Certifique-se que está seguindo o modelo padrão."
+                            return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
 
-                        p = Gastos.objects.create(
-                            cartao=cartao, categoria=categoria, item=item, valor=valor,
-                            parcelas=parcela_atual, parcelado=parcelas, 
-                            data_inicial=data_inicial_formatada, usuario=request.user
-                        )
+                        try:
+                            data_inicial = datetime.strptime(data_primeira_parcela, "%m/%Y")
+                        except ValueError:
+                            mensagem = f"Erro: Formato de data inválido em {data_primeira_parcela}. Certifique-se que está seguindo o modelo padrão."
+                            return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+
+                        copia_mes = data_inicial.month
+                        copia_ano = data_inicial.year
+
+                        for i in range(1, parcelas + 1):
+                            if total_registros >= 500:
+                                mensagem = "Limite de 500 registros atingido. Reduza o número de parcelas ou a quantidade de dados e tente novamente."
+                                return render(request, 'usuarios/ImportarGastos.html', {"mensagem": mensagem})
+                            parcela_atual = f"{i}/{parcelas}"
+                            if i == 1:
+                                data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
+                            else:
+                                copia_mes += 1
+                                if copia_mes > 12:
+                                    copia_mes = 1
+                                    copia_ano += 1
+                                data_inicial_formatada = f"{str(copia_mes).zfill(2)}/{str(copia_ano)}"
+
+                            p = Gastos.objects.create(
+                                cartao=cartao, categoria=categoria, item=item, valor=valor,
+                                parcelas=parcela_atual, parcelado=parcelas, 
+                                data_inicial=data_inicial_formatada, usuario=request.user
+                            )
+                            total_registros += 1
             mensagem = 'Arquivo importado com sucesso!'
 
         except Exception as e:
@@ -124,6 +163,14 @@ def criar_gasto(request):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
 
     if request.method == "POST" and "criar_gasto" in request.POST:
         cartao = request.POST.get("cartao").capitalize()
@@ -215,10 +262,18 @@ def criar_gasto(request):
         "graph_json_categoria": graph_json_categoria,
     })
 
-
+#Gastos individuais
 def gastosIndividuais(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     if request.method == 'POST':
         ids_para_deletar = request.POST.get('deletar_selecionados', '')
@@ -251,11 +306,20 @@ def gastosIndividuais(request):
         'total_entrada': total_entrada,
     })
 
-
+def FimDoTeste(request):
+    return render(request, 'usuarios/Fimdoteste.html')
 
 def gastosMensais(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     datas_disponiveis = Gastos.objects.filter(usuario=request.user).values_list('data_inicial', flat=True).distinct()
     lista_datas = list(datas_disponiveis)
@@ -308,6 +372,7 @@ def gastosMensais(request):
         elif agora_formatado not in verifica:
             primeira_data = Gastos.objects.filter(usuario = request.user).values_list('data_inicial', flat=True).distinct()
             consultar_data = primeira_data[0]
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
             existencia = 1
             total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
@@ -322,7 +387,6 @@ def gastosMensais(request):
             total_saldo = sum(entrada.valor_de_entrada for entrada in datas_filtradas) - total_entrada
             total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
             existencia = 1
-
 
 
 
@@ -372,7 +436,6 @@ def gastosMensais(request):
 
 
     #Por linhas mensais
-    
     filtrar_anos = Gastos.objects.filter(usuario=request.user).values_list("data_inicial", flat=True).distinct()
     anos_distintos = sorted(list({data.split("/")[1] for data in filtrar_anos}))
     #Gastos
@@ -494,6 +557,23 @@ def gastosMensais(request):
             ),
         )
     graph_json_mensal = fig_mensal.to_json()
+    
+    exportar_todos_gastos = Gastos.objects.filter(usuario=request.user).values()
+    exportar_todos_gastos_list = list(exportar_todos_gastos)
+
+    usuario = request.user
+
+    for gasto in exportar_todos_gastos_list:
+        gasto['valor'] = float(gasto['valor'])
+
+    if request.GET.get('download') == 'json':
+        response = HttpResponse(
+            json.dumps(exportar_todos_gastos_list, ensure_ascii=False, indent=4),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="Gastos.{usuario}.json"'
+        return response
+
 
     return render(request, "usuarios/gastosMensais.html", {
         "gastos": gastos_filtrados,
@@ -506,12 +586,36 @@ def gastosMensais(request):
         "anos_distintos": anos_distintos,
         "existencia": existencia,
         "total_receita": total_receita,
+        "importar_todos_gastos_list": exportar_todos_gastos_list,
     })
 
 def AdicionarSaldo(request):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
+    
+    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
+    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
+    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
+    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
+
+    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
+        return HttpResponseRedirect(reverse("FimDoTeste"))
+
+    exportar_todas_receitas = EntradaDinheiro.objects.filter(usuario=request.user).values()
+    exportar_todas_receitas_list = list(exportar_todas_receitas)
+    usuario = request.user
+
+    for receita in exportar_todas_receitas_list:
+        receita['valor_de_entrada'] = float(receita['valor_de_entrada'])
+
+    if request.GET.get('download') == 'json':
+        response = HttpResponse(
+            json.dumps(exportar_todas_receitas_list, ensure_ascii=False, indent=4),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="Receitas.{usuario}.json"'
+        return response
     
     if request.method == 'POST':
 
@@ -573,6 +677,7 @@ def AdicionarSaldo(request):
         "entradadinheiro": datas_filtradas,
         "datas_disponiveis": datas_disponiveis_ordenadas,
         "total_entrada": total_entrada,
+        "importar_todos_gastos_list": exportar_todas_receitas_list,
     })
 
 def register(request):

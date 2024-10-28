@@ -1,0 +1,44 @@
+{% extends "usuarios/layout.html" %}
+
+{% block body %}
+
+    {% csrf_token %}
+
+<style>
+    #divPrincipal{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(19, 75, 112);
+            border-radius: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            height: 600px;
+            overflow: auto;
+            box-shadow: 0 15px 25px rgba(14, 25, 27, 0.507);
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        h1{
+            color: white;
+            font-size: 200%;
+        }
+
+        p{
+            color: white;
+            font-size: 120%;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            text-align: center;
+        }
+</style>
+
+
+<div id="divPrincipal">
+    <h1>Você chegou ao limite de dados no teste.</h1>
+    <div>
+        <p><strong>Caso deseje ter <u>acesso</u> ao site verdadeiro de <u>forma gratuita</u>,</strong></p>
+        <p><strong>realize a solicitação através do <u>linkedin</u>: <a href="linkedin.com/in/murilocassuce">Murilo Cassuce</a></strong></p>
+    </div>
+</div>
+
+{% endblock %}

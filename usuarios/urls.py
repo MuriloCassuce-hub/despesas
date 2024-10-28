@@ -12,4 +12,5 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('AdicionarSaldo/', views.AdicionarSaldo, name='AdicionarSaldo'),
     path('ImportarGastos/',views.ImportarGastos, name='ImportarGastos'),
+    path('FimDoTeste/', views.FimDoTeste, name='FimDoTeste'),
 ]

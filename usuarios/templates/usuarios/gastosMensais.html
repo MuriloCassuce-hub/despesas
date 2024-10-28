@@ -198,6 +198,16 @@
         .h3Info{
         color: rgb(0, 21, 255);
         }
+
+        #ExportarTodosDados{
+            margin-top: 10px;
+            background-color: green;
+            border-radius: 10px;
+            padding: 10px;
+            color: whitesmoke;
+            width: 100%;
+            text-align: center;
+        }
     </style>
     
 
@@ -282,7 +292,7 @@
                 <span id="pageInfo2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag2">Próximo</button>
             </div>
-            <p>ooooi</p>
+            <a id="ExportarTodosDados" href="{% url 'gastosMensais' %}?download=json" class="button" download >Exportar dados: "Gastos" em JSON</a>
         </div>
     </div>
     <h1 id="h1Despesas" >Visualização de dados</h1>

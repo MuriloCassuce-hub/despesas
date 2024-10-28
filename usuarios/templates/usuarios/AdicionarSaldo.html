@@ -110,6 +110,15 @@
         border-radius: 10px;
     }
 
+    #ExportarTodosDados{
+        margin-top: 10px;
+        background-color: green;
+        border-radius: 10px;
+        padding: 10px;
+        color: whitesmoke;
+        width: 100%;
+        text-align: center;
+    }
     
 </style>
 
@@ -129,6 +138,7 @@
                 </select>
                 <button id="buttonConsultar" name="consultaMensal" type="submit">Consultar</button>
             </form>
+            <a id="ExportarTodosDados" href="{% url 'AdicionarSaldo' %}?download=json" class="button" download >Exportar dados: "Receitas" em JSON</a>
         </div>
         <form method="POST" id="formTabela" action="{% url 'AdicionarSaldo' %}">
             {% csrf_token %}
