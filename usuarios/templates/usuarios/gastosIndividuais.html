@@ -103,7 +103,6 @@
             border-radius: 5px;
         }
         
-
         #pgCriar_gasto:hover {
             background: rgb(64, 64, 63);
         }
@@ -122,10 +121,12 @@
         select{
             border: 1px solid rgb(80, 140, 155);
         }
+
         #buscarGastoindividual{
             background-color: rgb(82, 97, 237);
             color: #fff;
         }
+
         #paginationButtons {
             display: flex;
             justify-content: space-between;
@@ -155,13 +156,16 @@
             padding: 5px;
             margin-top: 4px;
         }
+
         #deleteCheck{
             cursor: pointer;
         }
+
         #deletarDados{
             background-color: rgb(228, 84, 84);
             color: white;
         }
+        
         .total{
             background-color: rgb(157, 175, 242);
             color: rgb(228, 84, 84);
@@ -172,9 +176,11 @@
             padding: 5px;
             border-radius: 10px;
         }
+
         .h3Info{
         color: rgb(0, 21, 255);
         }
+
     </style>
 
     <h1 id="h1Despesas" >Gastos por cartões</h1>
@@ -251,18 +257,21 @@
     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+
             document.getElementById("paginatualGastosIndividuais").removeAttribute("href");
             document.getElementById("paginatualGastosIndividuais").style.color = "black";
             document.getElementById("paginatualGastosIndividuais").style.border = "1px solid rgb(255, 255, 255)"
             document.getElementById("paginatualGastosIndividuais").style.padding = "4px";
             document.getElementById("paginatualGastosIndividuais").style.borderRadius = "5px"
             document.getElementById("paginatualGastosIndividuais").style.backgroundColor = "white";
+            
             document.getElementById("Logout").addEventListener("click", function(event){
             event.preventDefault();
             if (confirm("Você deseja realizar o log out?")){
                 window.location.href = "{% url 'logout' %}";
             }
             })
+
             document.getElementById("deletarDados").addEventListener("click", function(event) {
             event.preventDefault();
             if (confirm(`Você tem certeza que deseja apagar?`)) {
@@ -277,6 +286,8 @@
           }else {
                 alert("Ação cancelada!");
             }});
+
+
         const itemsPerPage = 11;
         let currentPage = 1;
         const items = document.querySelectorAll("#gastosTable .gasto-item");
