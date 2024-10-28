@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from .models import Gastos, EntradaDinheiro
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import render
 from .forms import UserRegistrationForm
 import plotly.graph_objects as go
@@ -11,7 +11,9 @@ from datetime import datetime
 from .corrigir_meses import suprir_meses, corrigir_linha_temporal
 import pandas as pd
 import json
+from django.db import IntegrityError
 
+User = get_user_model()
 
 #Verificação index
 def index(request):
@@ -684,14 +686,29 @@ def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            return render(request, 'usuarios/login.html', {
-                "mensagem": "Cadastro realizado com sucesso!"
-            })
+            email = form.cleaned_data['email']
+            if User.objects.filter(email=email).exists():
+                return render(request, 'usuarios/register.html', {
+                    'form': form,
+                    'erro': 'Este email já está em uso.'
+                })
+            try:
+                user = form.save(commit=False)
+                user.set_password(form.cleaned_data['password'])
+                user.save()
+                return render(request, 'usuarios/login.html', {
+                    "mensagem": "Cadastro realizado com sucesso!"
+                })
+            except IntegrityError:
+                return render(request, 'usuarios/register.html', {
+                    'form': form,
+                    'erro': 'Esse email já está registrado.'
+                })
         else:
-            return render(request, 'usuarios/register.html', {'form': form, 'erro': 'Verifique os dados fornecidos.'})
+            return render(request, 'usuarios/register.html', {
+                'form': form,
+                'erro': 'Verifique os dados fornecidos.'
+            })
     else:
         form = UserRegistrationForm()
     return render(request, 'usuarios/register.html', {'form': form})

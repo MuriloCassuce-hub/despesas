@@ -56,6 +56,7 @@ class EntradaDinheiro(models.Model):
 class User(AbstractUser):
     nome = models.CharField(max_length=100)
     data_cadastro = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField(unique=True)
     
     def __str__(self):
         return self.username  
