@@ -138,7 +138,7 @@
                 </select>
                 <button id="buttonConsultar" name="consultaMensal" type="submit">Consultar</button>
             </form>
-            <a id="ExportarTodosDados" href="{% url 'AdicionarSaldo' %}?download=json" class="button" download >Exportar dados: "Receitas" em JSON</a>
+            <a id="ExportarTodosDados" href="{% url 'AdicionarSaldo' %}?download=json" class="button" download >Exportar base de dados: Receitas</a>
         </div>
         <form method="POST" id="formTabela" action="{% url 'AdicionarSaldo' %}">
             {% csrf_token %}

@@ -189,6 +189,7 @@
             background-color: rgb(252, 250, 235);
             border-radius: 15px;
         }
+        
 
         #buscarGrafico{
             background-color: rgb(82, 97, 237);
@@ -292,7 +293,7 @@
                 <span id="pageInfo2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 <button id="proxPag2">Próximo</button>
             </div>
-            <a id="ExportarTodosDados" href="{% url 'gastosMensais' %}?download=json" class="button" download >Exportar dados: "Gastos" em JSON</a>
+            <a id="ExportarTodosDados" href="{% url 'gastosMensais' %}?download=json" class="button" download >Exportar base de dados: Gastos</a>
         </div>
     </div>
     <h1 id="h1Despesas" >Visualização de dados</h1>
@@ -324,9 +325,9 @@
         <div id="subdiv">
             <form id="formGastos">
                 <select name="tipoGrafico" id="selectGrafico">
-                    <option value="graficoCartaoPizza">Gráfico por cartão</option>
-                    <option value="graficoCategoriaPizza">Gráfico por categoria</option>
-                    <option value="graficoMensal">Gráfico Mensal Total</option>
+                    <option value="graficoCartaoPizza">Distribuição por cartão</option>
+                    <option value="graficoCategoriaPizza">Distribuição por categoria</option>
+                    <option value="graficoMensal">Distribuição temporal em linhas</option>
                 </select>
                 <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
             </form>

@@ -2,6 +2,7 @@
 <head>
     <title>Despesas</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="icon" href="https://cdn-icons-png.freepik.com/512/9190/9190502.png" type="image/x-icon">
 </head>
 <body>
 
@@ -72,7 +73,7 @@
         }
 
         #nometabela{
-           background-color: rgb(124, 195, 243);
+           background-color: rgba(251, 255, 0, 0.708);
            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
 
@@ -275,7 +276,7 @@
                         <td>{{ gasto.item }}</td>
                         <td>R$ {{ gasto.valor_parcelado|floatformat:2 }}</td>
                         <td>{{ gasto.parcelas }}</td>
-                        <td>R$ {{ gasto.valor }}</td>
+                        <td id="TesteValor">R$ {{ gasto.valor }}</td>
                         <td>{{ gasto.categoria }}</td>
                         <td>{{ gasto.data_inicial }}</td>
                     </tr>
@@ -349,12 +350,12 @@
 
     <div id="subdiv">
         <form id="formGastos">
-        <select name="tipoGrafico" id="selectGrafico">
-            <option value="graficoCartaoPizza">Gráfico por cartão</option>
-            <option value="graficoCategoriaPizza">Gráfico por categoria</option>
-        </select>
-        <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
-    </form>
+            <select name="tipoGrafico" id="selectGrafico">
+                <option value="graficoCartaoPizza">Distribuição por cartão</option>
+                <option value="graficoCategoriaPizza">Distribuição por categoria</option>
+            </select>
+            <button id="buscarGrafico" name="buscarGrafico">Filtrar</button>
+        </form>
     </div>
 
 </div>
@@ -389,7 +390,7 @@
                     }
                 });
 
-                let valorSaldoTexto = document.getElementById("testeID");
+                let valorSaldoTexto = document.getElementById("TesteValor");
         
                 if(!valorSaldoTexto){
                     document.getElementById("gasto-graph-cartao").style.display = "none";
