@@ -349,6 +349,7 @@ def gastosMensais(request):
         if consultar_data:
             gastos_filtrados = Gastos.objects.filter(data_inicial=consultar_data, usuario=request.user)
             existencia = 1
+            datas_filtradas = EntradaDinheiro.objects.filter(DataEntradaSaldo=consultar_data, usuario=request.user)
             total_receita = sum(entrada.valor_de_entrada for entrada in datas_filtradas)
 
         if gastos_filtrados.exists():
