@@ -689,7 +689,7 @@ def register(request):
             if User.objects.filter(email=email).exists():
                 return render(request, 'usuarios/register.html', {
                     'form': form,
-                    'erro': 'Este email já está em uso.'
+                    'erro': 'Este e-mail já está em uso.'
                 })
             try:
                 user = form.save(commit=False)
@@ -701,7 +701,7 @@ def register(request):
             except IntegrityError:
                 return render(request, 'usuarios/register.html', {
                     'form': form,
-                    'erro': 'Esse email já está registrado.'
+                    'erro': 'Erro ao registrar o usuário. Tente novamente.'
                 })
         else:
             return render(request, 'usuarios/register.html', {
