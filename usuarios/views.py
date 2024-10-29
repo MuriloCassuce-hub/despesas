@@ -333,10 +333,8 @@ def gastosMensais(request):
 
         if ids_para_deletar:
             ids_para_deletar = ids_para_deletar.split(',')
-            
             gastos = Gastos.objects.filter(id__in=ids_para_deletar, usuario=request.user)
             gastos.delete()
-            
             return HttpResponseRedirect(reverse('gastosMensais'))
 
     cartoes = Gastos.objects.filter(usuario=request.user).values_list('cartao', flat=True).distinct()
