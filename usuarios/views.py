@@ -21,14 +21,6 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
-    
     return HttpResponseRedirect(reverse("gastosMensais"))
 
 #Página de login
@@ -61,13 +53,6 @@ def ImportarGastos(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     CATEGORIA_GASTO = [
         ("Alimentação", "Alimentação"),
@@ -166,13 +151,6 @@ def criar_gasto(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
 
     if request.method == "POST" and "criar_gasto" in request.POST:
         cartao = request.POST.get("cartao").capitalize()
@@ -269,13 +247,6 @@ def gastosIndividuais(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     if request.method == 'POST':
         ids_para_deletar = request.POST.get('deletar_selecionados', '')
@@ -314,14 +285,6 @@ def FimDoTeste(request):
 def gastosMensais(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
-    
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
     
     datas_disponiveis = Gastos.objects.filter(usuario=request.user).values_list('data_inicial', flat=True).distinct()
     lista_datas = list(datas_disponiveis)
@@ -595,14 +558,6 @@ def AdicionarSaldo(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     
-    LimiteDadosGastosUsuarios = Gastos.objects.filter(usuario=request.user)
-    LimiteDadosGastosUsuarios_list = list(LimiteDadosGastosUsuarios)
-    LimiteDadosReceitasUsuarios = EntradaDinheiro.objects.filter(usuario=request.user)
-    LimiteDadosReceitasUsuarios_list = list(LimiteDadosReceitasUsuarios)
-
-    if len(LimiteDadosReceitasUsuarios_list) > 150 or len(LimiteDadosGastosUsuarios_list) > 150:
-        return HttpResponseRedirect(reverse("FimDoTeste"))
-
     exportar_todas_receitas = EntradaDinheiro.objects.filter(usuario=request.user).values()
     exportar_todas_receitas_list = list(exportar_todas_receitas)
     usuario = request.user
